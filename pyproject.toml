@@ -11,6 +11,8 @@ dependencies = []  # core engine is standard-library only
 [project.optional-dependencies]
 # Only needed if you opt into the real-LLM provider (DOCEXTRACT_PROVIDER=anthropic).
 llm = ["anthropic>=0.40"]
+# Only needed to build the executive one-pager (scripts/make_onepager.py).
+deliverables = ["matplotlib>=3.5"]
 dev = ["pytest>=7", "ruff>=0.5"]
 
 [project.scripts]
