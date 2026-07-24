@@ -1,8 +1,12 @@
 # doc-extract-agent
 
+Picture a three-person AP & order-desk team keying ~60,000 supplier invoices, order confirmations, and delivery notes into the ERP by hand every year — four minutes a document, and a mistyped total only shows up later as a payment dispute. This is the loop that eats it: **it takes handling from ~4 minutes to under a second per document and frees on the order of €110k/yr of AP capacity** (modeled — see the business case), because only the documents that reconcile and clear a confidence gate post automatically, and the rest route to a human.
+
 Paste a business document — an RFQ email, an invoice, a delivery note — and get structured data back: header fields, line items, and totals that are cross-checked against the line items, each with a confidence score, plus a step-by-step trace of how it got there.
 
 This is the "unstructured document in, structured record out" loop that sits under a lot of Data & AI automation work, and I built it while learning that space for internship applications. It complements a sibling project, `agentic-automation-lab`. Everything runs on Python's standard library — no dependencies, no API key, no build step.
+
+**Business case:** [`docs/BUSINESS_CASE.md`](docs/BUSINESS_CASE.md) — the AP scenario, the arithmetic behind the numbers above, and the confidence-gate behaviour, with a one-page [executive summary PDF](deliverables/executive_onepager.pdf).
 
 ## Running it
 
