@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>doc-extract-agent</title>
+  <style>
+    :root {
+      --bg: #0f1420;
+      --panel: #171e2e;
+      --panel-2: #1e2740;
+      --border: #2a3550;
+      --text: #e7ecf5;
+      --muted: #93a0bd;
+      --accent: #5b9dff;
+      --accent-2: #7c5cff;
+      --ok: #34c98a;
+      --warn: #f0b347;
+      --bad: #ff6b6b;
+      --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: var(--sans); line-height: 1.5;
+    }
+    header {
+      padding: 22px 28px; border-bottom: 1px solid var(--border);
+      background: linear-gradient(120deg, #141b2c, #10182a);
+      display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    }
+    header h1 { margin: 0; font-size: 20px; letter-spacing: .3px; }
+    header .tag {
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+      background: var(--panel-2); padding: 3px 9px; border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+    header p { margin: 0; color: var(--muted); font-size: 13px; width: 100%; }
+    main {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+      padding: 22px 28px; max-width: 1500px; margin: 0 auto;
+    }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 18px;
+    }
+    .card h2 {
+      margin: 0 0 12px; font-size: 13px; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--muted); font-weight: 600;
+    }
+    .controls { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    select, button {
+      font-family: var(--sans); font-size: 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--panel-2);
+      color: var(--text); padding: 9px 12px; cursor: pointer;
+    }
+    button.primary {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      border: none; color: #fff; font-weight: 600; padding: 9px 20px;
+    }
+    button.primary:disabled { opacity: .5; cursor: default; }
+    button.ghost { background: transparent; }
+    textarea {
+      width: 100%; height: 340px; resize: vertical; background: #0d1220;
+      color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px; font-family: var(--mono); font-size: 12.5px; line-height: 1.5;
+    }
+    textarea.drag { border-color: var(--accent); }
+    .trace { max-height: 210px; overflow-y: auto; font-family: var(--mono); font-size: 12.5px; }
+    .trace .ev { display: flex; gap: 10px; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px; background: var(--panel-2); }
+    .trace .step { color: var(--muted); min-width: 22px; }
+    .trace .stg { color: var(--accent); min-width: 88px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: none; }
+    .dot.ok { background: var(--ok); } .dot.info { background: var(--accent); } .dot.warn { background: var(--warn); }
+    .kv { display: grid; grid-template-columns: 160px 1fr auto; gap: 6px 12px; align-items: center; font-size: 13.5px; }
+    .kv .k { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+    .kv .v { word-break: break-word; }
+    .badge {
+      font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 20px;
+      border: 1px solid var(--border); white-space: nowrap;
+    }
+    .badge.high { color: var(--ok); border-color: #1f6b4c; background: #10241c; }
+    .badge.med { color: var(--warn); border-color: #6b5a1f; background: #241f10; }
+    .badge.low { color: var(--bad); border-color: #6b1f1f; background: #241010; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+    td.num { text-align: right; font-family: var(--mono); }
+    .pill { display: inline-block; font-family: var(--mono); font-size: 12px; padding: 3px 10px; border-radius: 20px; background: var(--panel-2); border: 1px solid var(--border); }
+    .type-pill { text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+    .totalsrow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px; }
+    .totalsrow .lbl { color: var(--muted); }
+    .valid { color: var(--ok); } .invalid { color: var(--warn); }
+    .exports { display: flex; gap: 10px; margin-top: 14px; }
+    .muted { color: var(--muted); font-size: 12.5px; }
+    .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
+    footer { padding: 16px 28px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>doc-extract-agent</h1>
+    <span class="tag">agentic &middot; stdlib-only &middot; offline</span>
+    <p>Paste or drop a business document (RFQ email, invoice, delivery note). An agentic pipeline extracts structured fields with a live trace and per-field confidence.</p>
+  </header>
+
+  <main>
+    <!-- LEFT: input -->
+    <section class="card">
+      <h2>Document</h2>
+      <div class="controls">
+        <select id="sample">
+          <option value="">Load a sample&hellip;</option>
+          <option value="rfq">RFQ email</option>
+          <option value="invoice">Invoice</option>
+          <option value="delivery">Delivery note</option>
+        </select>
+        <button class="ghost" id="clear">Clear</button>
+        <button class="primary" id="extract">Extract &rarr;</button>
+      </div>
+      <textarea id="input" placeholder="Paste a document here, or drop a .txt file&hellip;"></textarea>
+      <p class="muted" id="status">Ready.</p>
+    </section>
+
+    <!-- RIGHT: pipeline trace -->
+    <section class="card">
+      <h2>Pipeline trace</h2>
+      <div class="trace" id="trace"><div class="empty">Run an extraction to see the agentic pipeline execute stage by stage.</div></div>
+    </section>
+
+    <!-- Structured output spans both columns -->
+    <section class="card" style="grid-column: 1 / -1;">
+      <h2>Structured result</h2>
+      <div id="result">
+        <div class="empty">No result yet.</div>
+      </div>
+      <div class="exports" id="exports" style="display:none;">
+        <button class="ghost" id="dl-json">Download JSON</button>
+        <button class="ghost" id="dl-csv">Download line items (CSV)</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Built by <strong>Dimitres Kisimov</strong> &middot; MIT License, 2026 &middot; heuristic mock engine (swap the provider for a real LLM in production).
+  </footer>
+
+  <script>
+  //--- Embedded samples (keeps the UI fully offline; identical to samples/*.txt) ---
+  const SAMPLES = {
+    rfq: `From: procurement@acme-industrial.example
+To: sales@example-supplier.example
+Subject: Request for Quotation - RFQ-2026-0417
+Date: 2026-07-14
+
+Dear Sales Team,
+
+We would like to request a quotation for the following items. Please provide
+your best pricing and lead times at your earliest convenience.
+
+Pos  Description                          Qty    Unit
+1    Hex bolt M8x40 DIN 933 zinc          500    pcs
+2    Hex nut M8 DIN 934 zinc              500    pcs
+3    Washer M8 DIN 125 zinc              1000    pcs
+
+Deliver to: Acme Industrial GmbH, Musterstrasse 12, 74653 Kunzelsau, Germany
+Requested delivery date: 2026-08-01
+Currency: EUR
+
+Best regards,
+Maria Schmidt
+Procurement Department
+Acme Industrial GmbH`,
+    invoice: `INVOICE
+
+Example Supplier Handels GmbH
+Industriestrasse 12-17
+74653 Kunzelsau, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-8842
+Invoice Date: 2026-07-18
+Due Date: 2026-08-17
+Order Reference: RFQ-2026-0417
+Currency: EUR
+
+Line  Description                     Qty    Unit Price    Amount
+1     Hex bolt M8x40 DIN 933          500        0.12       60.00
+2     Hex nut M8 DIN 934              500        0.05       25.00
+3     Washer M8 DIN 125             1000        0.02       20.00
+
+Subtotal:      105.00
+VAT (19%):      19.95
+Total:         124.95
+
+Payment terms: 30 days net. Please reference the invoice number with payment.`,
+    delivery: `DELIVERY NOTE
+
+Example Supplier Handels GmbH
+Industriestrasse 12-17
+74653 Kunzelsau, Germany
+
+Deliver To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Delivery Note No: DN-2026-3310
+Delivery Date: 2026-07-20
+Order Reference: RFQ-2026-0417
+
+Pos  Description                     Qty    Unit
+1    Hex bolt M8x40 DIN 933          500    pcs
+2    Hex nut M8 DIN 934              500    pcs
+3    Washer M8 DIN 125             1000    pcs
+
+Total packages: 3
+Total weight: 45 kg
+
+Goods received in good condition. Please sign and return one copy.`
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const input = $("input");
+  let lastResult = null;
+
+  $("sample").addEventListener("change", (e) => {
+    if (SAMPLES[e.target.value]) { input.value = SAMPLES[e.target.value]; setStatus("Sample loaded."); }
+  });
+  $("clear").addEventListener("click", () => { input.value = ""; $("sample").value = ""; setStatus("Cleared."); });
+  $("extract").addEventListener("click", runExtract);
+
+  // Drag & drop a text file onto the textarea.
+  ["dragover", "dragenter"].forEach(ev => input.addEventListener(ev, e => { e.preventDefault(); input.classList.add("drag"); }));
+  ["dragleave", "drop"].forEach(ev => input.addEventListener(ev, e => { e.preventDefault(); input.classList.remove("drag"); }));
+  input.addEventListener("drop", (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) { const r = new FileReader(); r.onload = () => { input.value = r.result; setStatus("File loaded: " + file.name); }; r.readAsText(file); }
+  });
+
+  function setStatus(msg) { $("status").textContent = msg; }
+
+  function confClass(c) { return c >= 0.85 ? "high" : c >= 0.6 ? "med" : "low"; }
+  function pct(c) { return Math.round(c * 100) + "%"; }
+  function esc(s) { return String(s).replace(/[&<>]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m])); }
+
+  async function runExtract() {
+    const text = input.value;
+    if (!text.trim()) { setStatus("Nothing to extract — paste a document first."); return; }
+    $("extract").disabled = true;
+    setStatus("Running pipeline&hellip;");
+    try {
+      const resp = await fetch("/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const data = await resp.json();
+      if (data.error) { setStatus("Error: " + data.error); return; }
+      lastResult = data;
+      await animateTrace(data.trace || []);
+      renderResult(data);
+      setStatus("Done — overall confidence " + pct(data.confidence || 0) + ".");
+    } catch (err) {
+      setStatus("Request failed: " + err.message);
+    } finally {
+      $("extract").disabled = false;
+    }
+  }
+
+  // Reveal trace events one-by-one for a live "agent thinking" feel.
+  async function animateTrace(events) {
+    const box = $("trace");
+    box.innerHTML = "";
+    for (const ev of events) {
+      const row = document.createElement("div");
+      row.className = "ev";
+      row.innerHTML = `<span class="dot ${ev.status}"></span>` +
+        `<span class="step">${ev.step}</span>` +
+        `<span class="stg">${esc(ev.stage)}</span>` +
+        `<span class="msg">${esc(ev.message)}</span>`;
+      box.appendChild(row);
+      box.scrollTop = box.scrollHeight;
+      await new Promise(r => setTimeout(r, 160));
+    }
+  }
+
+  function renderResult(data) {
+    const fields = data.fields || {};
+    const items = data.line_items || [];
+    const totals = data.totals || {};
+    const out = [];
+
+    out.push(`<div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+      <span class="pill type-pill">${esc(data.doc_type)}</span>
+      <span class="badge ${confClass(data.confidence || 0)}">overall ${pct(data.confidence || 0)}</span>
+    </div>`);
+
+    // Header fields
+    if (Object.keys(fields).length) {
+      out.push('<div class="kv">');
+      for (const [k, f] of Object.entries(fields)) {
+        out.push(`<div class="k">${esc(k)}</div><div class="v">${esc(f.value)}</div>` +
+          `<div><span class="badge ${confClass(f.confidence)}">${pct(f.confidence)}</span></div>`);
+      }
+      out.push('</div>');
+    } else {
+      out.push('<div class="empty">No header fields detected.</div>');
+    }
+
+    // Line items
+    if (items.length) {
+      out.push('<table><thead><tr><th>#</th><th>Description</th><th>Qty</th><th>Unit</th><th>Unit price</th><th>Amount</th><th>Conf.</th></tr></thead><tbody>');
+      for (const it of items) {
+        out.push(`<tr>
+          <td>${esc(it.position)}</td>
+          <td>${esc(it.description)}</td>
+          <td class="num">${esc(fmt(it.quantity))}</td>
+          <td>${esc(it.unit ?? "")}</td>
+          <td class="num">${it.unit_price != null ? esc(fmt(it.unit_price)) : "&ndash;"}</td>
+          <td class="num">${it.amount != null ? esc(fmt(it.amount)) : "&ndash;"}</td>
+          <td><span class="badge ${confClass(it.confidence)}">${pct(it.confidence)}</span></td>
+        </tr>`);
+      }
+      out.push('</tbody></table>');
+    }
+
+    // Totals
+    const trows = [];
+    for (const key of ["subtotal", "tax", "total"]) {
+      if (totals[key]) trows.push(`<div class="totalsrow"><span class="lbl">${key}</span><span>${esc(fmt(totals[key].value))} <span class="badge ${confClass(totals[key].confidence)}">${pct(totals[key].confidence)}</span></span></div>`);
+    }
+    if (totals.computed_line_total != null) {
+      trows.push(`<div class="totalsrow"><span class="lbl">computed line total</span><span>${esc(fmt(totals.computed_line_total))}</span></div>`);
+    }
+    if (trows.length) {
+      out.push('<div style="max-width:420px;margin-top:14px;">' + trows.join("") +
+        `<div class="totalsrow"><span class="lbl">validation</span><span class="${totals.validated ? "valid" : "invalid"}">${totals.validated ? "✓ totals match line items" : "not cross-validated"}</span></div></div>`);
+    }
+
+    $("result").innerHTML = out.join("");
+    $("exports").style.display = "flex";
+  }
+
+  function fmt(n) {
+    if (typeof n !== "number") return n;
+    return Number.isInteger(n) ? String(n) : n.toFixed(2);
+  }
+
+  // --- Exports ---
+  $("dl-json").addEventListener("click", () => {
+    if (!lastResult) return;
+    download("extraction.json", JSON.stringify(lastResult, null, 2), "application/json");
+  });
+  $("dl-csv").addEventListener("click", () => {
+    if (!lastResult) return;
+    const rows = [["position", "description", "quantity", "unit", "unit_price", "amount", "confidence"]];
+    for (const it of (lastResult.line_items || [])) {
+      rows.push([it.position, it.description, it.quantity, it.unit ?? "", it.unit_price ?? "", it.amount ?? "", it.confidence]);
+    }
+    const csv = rows.map(r => r.map(cell => {
+      const s = String(cell);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(",")).join("\n");
+    download("line_items.csv", csv, "text/csv");
+  });
+
+  function download(name, content, type) {
+    const blob = new Blob([content], { type });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  </script>
+</body>
+</html>
