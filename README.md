@@ -1,108 +1,50 @@
 # doc-extract-agent
 
-**Paste a business document → get structured data back, live.** An interactive,
-agentic document-intelligence engine that turns an RFQ email, invoice, or
-delivery note into clean fields, line items, and validated totals — with a
-step-by-step trace and a per-field confidence score.
+Paste a business document — an RFQ email, an invoice, a delivery note — and get structured data back: header fields, line items, and totals that are cross-checked against the line items, each with a confidence score, plus a step-by-step trace of how it got there.
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![No dependencies](https://img.shields.io/badge/core-stdlib--only-success)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Design](https://img.shields.io/badge/design-agentic%20pipeline-7c5cff)
+This is the "unstructured document in, structured record out" loop that sits under a lot of Data & AI automation work, and I built it while learning that space for internship applications. It complements a sibling project, `agentic-automation-lab`. Everything runs on Python's standard library — no dependencies, no API key, no build step.
 
-> **Unstructured document → structured data, interactively.** This is the core
-> Data & AI automation loop: classify a document, pull the fields that matter,
-> cross-check them, and hand back machine-readable output a downstream workflow
-> can act on — with the reasoning visible at every step.
-
----
-
-## Run in 30 seconds
-
-No dependencies, no API key, no build step. Just Python's standard library.
+## Running it
 
 ```bash
-git clone <this-repo> doc-extract-agent
-cd doc-extract-agent
 python -m docextract.server
 ```
 
-Then open **http://127.0.0.1:8000** in your browser, pick a sample from the
-dropdown (or paste your own document), and hit **Extract**.
-
-![screenshot placeholder](docs/screenshot.png)
-<!-- Add a screenshot of the UI here: left = document input, right = live pipeline
-     trace, bottom = structured fields + line-item table with confidence badges. -->
-
-## What it does
-
-Drop in a document and an **agentic pipeline** runs five traced stages:
-
-| Stage | What happens |
-|-------|--------------|
-| `detect` | Classify the document — invoice / delivery note / RFQ. |
-| `header` | Extract parties, dates, currency, document & reference numbers. |
-| `line_items` | Parse the tabular line items (position, description, qty, unit, price, amount). |
-| `totals` | Extract stated totals and **cross-validate** them against the summed line items. |
-| `confidence` | Aggregate a single overall confidence score in `[0, 1]`. |
-
-Every stage emits a trace event, so you watch the "agent" reason in real time.
-Results export as **JSON** (full structure) or **CSV** (line items).
-
-### API
-
-The UI is backed by a tiny `http.server`:
+Open http://127.0.0.1:8000, pick a sample from the dropdown or paste your own text, and hit Extract. There's also a small HTTP API:
 
 ```
-POST /extract   Body: {"text": "<document text>"}
-                → {"doc_type", "fields", "line_items", "totals", "confidence", "trace"}
+POST /extract   {"text": "<document text>"}  →  {doc_type, fields, line_items, totals, confidence, trace}
 ```
 
-```bash
-curl -s http://127.0.0.1:8000/extract \
-  -H 'Content-Type: application/json' \
-  -d '{"text": "INVOICE\nInvoice Number: INV-1\nTotal: 10.00"}'
-```
-
-Or use the engine directly:
+Or call the engine directly:
 
 ```python
 from docextract import extract_document
 
 result = extract_document(open("samples/invoice.txt").read())
-print(result["doc_type"])                 # "invoice"
-print(result["totals"]["validated"])      # True
+print(result["doc_type"])            # "invoice"
+print(result["totals"]["validated"]) # True
 ```
 
-## What it demonstrates
+## What runs when you hit Extract
 
-- **Agentic pipeline design** — ordered, single-responsibility stages that each
-  emit a trace event, so the system's reasoning is observable and debuggable.
-- **Document AI / IDP** — turning unstructured RFQs, invoices, and delivery
-  notes into validated, structured records.
-- **Provider abstraction** — a pluggable `LLMProvider` interface with an offline
-  `MockProvider` default and an opt-in `AnthropicProvider`. Swap the provider,
-  not the pipeline, to go from heuristic demo to a real model.
-- **Confidence & validation** — per-field scores plus a totals cross-check that
-  boosts confidence when the numbers reconcile and flags them when they don't.
-- **Stdlib-only web server** — the whole app (server + API + static UI) runs on
-  `http.server` with zero third-party packages.
-- **Interactive, offline UI** — vanilla JS, no CDN, no build, with a live trace,
-  color-coded confidence badges, and JSON/CSV export.
-- **Testing discipline** — a `pytest` suite over the three samples plus
-  robustness tests that feed the pipeline garbage and assert it never crashes.
+A five-stage pipeline, and each stage emits a trace event so you can watch it work: `detect` classifies the document, `header` pulls parties/dates/currency/reference numbers, `line_items` parses the table, `totals` extracts the stated totals and cross-checks them against the summed line items, and `confidence` rolls everything into one score. Results export as JSON or CSV.
 
-## Limitations (honest)
+## The two bugs that made me write real tests
 
-- **The extraction is a heuristic mock, not a real LLM.** It uses regex and
-  column-aware table parsing tuned for clean, well-structured documents. It is
-  deliberately deterministic so the demo runs offline with no key.
-- Messy scans, OCR noise, multi-page tables, unusual layouts, and languages
-  beyond the sample style will degrade or miss fields.
-- **For production, swap the provider.** The pipeline is already built around
-  `LLMProvider`; set `DOCEXTRACT_PROVIDER=anthropic` (and `ANTHROPIC_API_KEY`)
-  and route each stage's extraction through a real model. The stages, trace,
-  confidence model, and validation logic stay exactly the same.
+The parsing looks straightforward until you actually run it against realistic samples, and two things bit me:
+
+**"VAT (19%): 19.95" extracted the tax as 19.** My first tax regex just grabbed the first number after the VAT label, so it happily returned `19` — the percentage — instead of `19.95`, the actual amount. The fix was to require a colon before the number so the `(19%)` in parentheses gets skipped. There's now a test pinning `tax == 19.95` specifically so this can't regress.
+
+**"Subtotal: 105.00" was being read as the Total.** A bare `\bTotal` pattern matches inside the word "Subtotal", so the total field kept picking up the subtotal value. I added a negative lookbehind (`(?<!Sub)`) so `Total` only matches when it isn't the tail of `Subtotal`. Both figures now come out separately, and the totals validation catches when the line-item sum doesn't reconcile.
+
+The number parsing has its own share of this — it has to handle both `1.234,56` (EU) and `1,234.56` (US) and decide which separator is the decimal — which is the other place the tests earn their keep.
+
+## Limitations
+
+- The extraction is a deterministic heuristic (regex plus column-aware table parsing), not a real LLM. That's on purpose — it keeps the demo offline and reproducible — but it's tuned for clean, well-structured documents.
+- Messy scans, OCR noise, multi-page tables, unusual layouts, or languages outside the sample style will drop or miss fields.
+- For production, the pipeline is already built around an `LLMProvider` interface. Set `DOCEXTRACT_PROVIDER=anthropic` (plus `ANTHROPIC_API_KEY`) and each stage routes its extraction through a real model — the stages, trace, confidence, and validation logic stay put.
 
 ## Tests
 
@@ -112,28 +54,12 @@ ruff check .
 pytest -q
 ```
 
-## About this project — Dimitres Kisimov
+The suite runs the three shipped samples end to end and also feeds the pipeline garbage to check it never crashes.
 
-Built to demonstrate the skills behind **document automation for a Data & AI
-role** — specifically the Würth *"Data & AI — (Agentic) Automation with Low-code
-Platforms"* context, where agentic document processing (unstructured input →
-structured, validated output that a low-code workflow can consume) is the
-central task.
+## Next
 
-It complements a sibling project, *agentic-automation-lab*; this repo is the
-**"unstructured document → structured data, interactively"** piece.
+I'd like to run the same documents through the Anthropic provider and diff its output against the heuristic — partly to see where the regex quietly loses, partly to make the confidence scores mean something calibrated rather than hand-picked.
 
-Skills on show:
+---
 
-- Designing **agentic pipelines** with observable, traced reasoning.
-- **Intelligent Document Processing** — classification, field/line-item
-  extraction, and total validation.
-- Clean **provider abstraction** so a heuristic prototype upgrades to a real LLM
-  without rework.
-- Shipping a **dependency-free, offline** full-stack tool (server + API + UI).
-- **Testing and CI** discipline — linting, unit tests, and a live server smoke
-  test on multiple Python versions.
-
-## License
-
-MIT © 2026 Dimitres Kisimov — see [LICENSE](LICENSE).
+Dimitres Kisimov · MIT
