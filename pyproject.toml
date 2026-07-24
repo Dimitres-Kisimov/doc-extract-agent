@@ -1,0 +1,30 @@
+[project]
+name = "doc-extract-agent"
+version = "1.0.0"
+description = "An interactive, agentic document-intelligence engine (stdlib-only) that extracts structured data from business documents."
+authors = [{ name = "Dimitres Kisimov" }]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []  # core engine is standard-library only
+
+[project.optional-dependencies]
+# Only needed if you opt into the real-LLM provider (DOCEXTRACT_PROVIDER=anthropic).
+llm = ["anthropic>=0.40"]
+dev = ["pytest>=7", "ruff>=0.5"]
+
+[project.scripts]
+docextract-server = "docextract.server:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "N", "SIM"]
+ignore = ["E501"]  # long lines tolerated in sample/heuristic-heavy code
