@@ -1,0 +1,27 @@
+INVOICE
+
+Example Supplier Handels GmbH
+Industriestrasse 12-17
+74653 Kunzelsau, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-8842
+Invoice Date: 2026-07-18
+Due Date: 2026-08-17
+Order Reference: RFQ-2026-0417
+Currency: EUR
+
+Line  Description                     Qty    Unit Price    Amount
+1     Hex bolt M8x40 DIN 933          500        0.12       60.00
+2     Hex nut M8 DIN 934              500        0.05       25.00
+3     Washer M8 DIN 125             1000        0.02       20.00
+
+Subtotal:      105.00
+VAT (19%):      19.95
+Total:         124.95
+
+Payment terms: 30 days net. Please reference the invoice number with payment.

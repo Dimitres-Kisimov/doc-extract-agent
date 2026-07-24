@@ -1,0 +1,23 @@
+From: procurement@acme-industrial.example
+To: sales@example-supplier.example
+Subject: Request for Quotation - RFQ-2026-0417
+Date: 2026-07-14
+
+Dear Sales Team,
+
+We would like to request a quotation for the following items. Please provide
+your best pricing and lead times at your earliest convenience.
+
+Pos  Description                          Qty    Unit
+1    Hex bolt M8x40 DIN 933 zinc          500    pcs
+2    Hex nut M8 DIN 934 zinc              500    pcs
+3    Washer M8 DIN 125 zinc              1000    pcs
+
+Deliver to: Acme Industrial GmbH, Musterstrasse 12, 74653 Kunzelsau, Germany
+Requested delivery date: 2026-08-01
+Currency: EUR
+
+Best regards,
+Maria Schmidt
+Procurement Department
+Acme Industrial GmbH
