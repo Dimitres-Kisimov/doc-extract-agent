@@ -4,6 +4,8 @@ Picture a three-person AP & order-desk team keying ~60,000 supplier invoices, or
 
 Paste a business document — an RFQ email, an invoice, a delivery note — and get structured data back: header fields, line items, and totals that are cross-checked against the line items, each with a confidence score, plus a step-by-step trace of how it got there.
 
+![doc-extract-agent web UI — document input with sample loader, pipeline trace panel and structured-result area (landing state)](docs/img/ui.png)
+
 This is the "unstructured document in, structured record out" loop that sits under a lot of Data & AI automation work, and I built it while learning that space for internship applications. It complements a sibling project, `agentic-automation-lab`. Everything runs on Python's standard library — no dependencies, no API key, no build step.
 
 **Business case:** [`docs/BUSINESS_CASE.md`](docs/BUSINESS_CASE.md) — the AP scenario, the arithmetic behind the numbers above, and the confidence-gate behaviour, with a one-page [executive summary PDF](deliverables/executive_onepager.pdf).
