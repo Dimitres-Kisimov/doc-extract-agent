@@ -66,4 +66,4 @@ I'd like to run the same documents through the Anthropic provider and diff its o
 
 ---
 
-Dimitres Kisimov · MIT
+© 2026 Dimitres Kisimov — all rights reserved; published for portfolio review. See LICENSE.

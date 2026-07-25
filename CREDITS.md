@@ -29,4 +29,4 @@ interactive UI works fully offline.
 
 ## License
 
-MIT © 2026 Dimitres Kisimov. See [LICENSE](LICENSE).
+© 2026 Dimitres Kisimov — all rights reserved; third-party libraries remain under their own licenses. See [LICENSE](LICENSE).

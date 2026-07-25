@@ -5,7 +5,7 @@ description = "An interactive, agentic document-intelligence engine (stdlib-only
 authors = [{ name = "Dimitres Kisimov" }]
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "Proprietary" }
 dependencies = []  # core engine is standard-library only
 
 [project.optional-dependencies]
