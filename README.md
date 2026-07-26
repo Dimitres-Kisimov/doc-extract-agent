@@ -19,22 +19,33 @@ python -m docextract.server
 Open http://127.0.0.1:8000, pick a sample from the dropdown or paste your own text, and hit Extract. There's also a small HTTP API:
 
 ```
-POST /extract   {"text": "<document text>"}  →  {doc_type, fields, line_items, totals, confidence, trace}
+POST /extract        {"text": "<document text>", "gate_threshold": 0.85}
+                     →  {doc_type, fields, line_items, totals, confidence, gate, trace}
+
+POST /extract/batch  {"documents": [{"name": "a.txt", "text": "..."}, ...], "gate_threshold": 0.85}
+                     →  {results: [{name, ...same shape as /extract}], summary: {documents, auto_post, review, gate_threshold}}
 ```
+
+`gate_threshold` is optional (default 0.85); a batch takes up to 50 documents and shares the 1 MB request limit.
 
 Or call the engine directly:
 
 ```python
-from docextract import extract_document
+from docextract import evaluate_gate, extract_document
 
 result = extract_document(open("samples/invoice.txt").read())
-print(result["doc_type"])            # "invoice"
-print(result["totals"]["validated"]) # True
+print(result["doc_type"])                     # "invoice"
+print(result["totals"]["validated"])          # True
+print(evaluate_gate(result)["disposition"])   # "auto_post"
 ```
 
 ## What runs when you hit Extract
 
 A five-stage pipeline, and each stage emits a trace event so you can watch it work: `detect` classifies the document, `header` pulls parties/dates/currency/reference numbers, `line_items` parses the table, `totals` extracts the stated totals and cross-checks them against the summed line items, and `confidence` rolls everything into one score. Results copy to the clipboard (per field, or all fields as a tab-separated block that pastes into Excel/an ERP form) and export as JSON or CSV — line items only, or the full record (header fields + totals + line items) as one importable table. Ctrl+Enter extracts without leaving the textarea.
+
+Every result is then stamped by the **confidence gate** — the heuristic rule from the business case, now implemented: auto-post requires overall confidence at or above the gate (default 85%, adjustable in the UI and per API request) *and* totals that cross-validate against the line items. Everything else is marked **needs review** with the specific reasons, and every below-gate field is flagged so a reviewer knows what to check first. A document with no monetary totals — an RFQ, a delivery note — always routes to review; flagged fields never change the disposition, they just mark where to look.
+
+For the stack-of-emails case there's a **batch mode**: drop several `.txt`/`.eml` files onto the textarea (or pick them with "Batch files…") and they're all extracted in one request. You get a results table — file, type, document number, overall confidence, auto-post/review per document — any row opens into the full trace and result panels, and two combined exports: one CSV of full records across all documents (prefixed with source file and gate disposition) and the whole batch as JSON. `.eml` files are read as plain text; there's no MIME or quoted-reply cleanup yet.
 
 ## The two bugs that made me write real tests
 

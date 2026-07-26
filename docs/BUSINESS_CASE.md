@@ -60,7 +60,10 @@ confidence and the document is flagged `validated`.
 ### Confidence gating (real behaviour, straight-through vs. review)
 
 The gate is what makes this safe to trust with posting: only documents that
-clear it post automatically; everything else routes to a clerk.
+clear it post automatically; everything else routes to a clerk. It is
+implemented in the app: the UI and the API stamp every extraction with an
+`auto-post` / `review` disposition (plus per-field below-gate flags), and the
+threshold is adjustable (default 0.85).
 
 - **Straight-through (auto-post):** overall confidence ≥ 0.85 **and** totals
   cross-validated.
