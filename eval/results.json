@@ -1,0 +1,1876 @@
+{
+  "by_type": {
+    "delivery_note": {
+      "documents": 6,
+      "field_accuracy": 0.9655,
+      "fully_correct": 3,
+      "item_f1": 0.963
+    },
+    "invoice": {
+      "documents": 13,
+      "field_accuracy": 0.967,
+      "fully_correct": 9,
+      "item_f1": 0.8387
+    },
+    "rfq": {
+      "documents": 8,
+      "field_accuracy": 0.9459,
+      "fully_correct": 4,
+      "item_f1": 1.0
+    }
+  },
+  "dataset": "eval\\dataset",
+  "documents": [
+    {
+      "confidence": 0.8611,
+      "disposition": "review",
+      "doc_type": "delivery_note",
+      "doc_type_correct": true,
+      "edge": "clean",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-20",
+          "extracted": "2026-07-20",
+          "match": true
+        },
+        "document_number": {
+          "expected": "DN-2026-1873",
+          "extracted": "DN-2026-1873",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0417",
+          "extracted": "RFQ-2026-0417",
+          "match": true
+        },
+        "seller": {
+          "expected": "Nordwind Stahlhandel GmbH",
+          "extracted": "Nordwind Stahlhandel GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "dn01_clean",
+      "items": {
+        "expected": 3,
+        "fn": 0,
+        "fp": 0,
+        "tp": 3
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8688,
+      "disposition": "review",
+      "doc_type": "delivery_note",
+      "doc_type_correct": true,
+      "edge": "unicode_names",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Construções Navais do Tejo S.A.",
+          "extracted": "Construções Navais do Tejo S.A.",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-17",
+          "extracted": "2026-07-17",
+          "match": true
+        },
+        "document_number": {
+          "expected": "DN-2026-9566",
+          "extracted": "DN-2026-9566",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0733",
+          "extracted": "RFQ-2026-0733",
+          "match": true
+        },
+        "seller": {
+          "expected": "Iberica Tornillos SA",
+          "extracted": "Iberica Tornillos SA",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "dn02_unicode_buyer",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8313,
+      "disposition": "review",
+      "doc_type": "delivery_note",
+      "doc_type_correct": true,
+      "edge": "missing_order_reference",
+      "errors": [
+        "field currency: spurious (not on the document)"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-14",
+          "extracted": "2026-07-14",
+          "match": true
+        },
+        "document_number": {
+          "expected": "DN-2026-2263",
+          "extracted": "DN-2026-2263",
+          "match": true
+        },
+        "seller": {
+          "expected": "Verpackung Direkt GmbH",
+          "extracted": "Verpackung Direkt GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "dn03_no_order_ref",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [
+        "currency"
+      ],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.86,
+      "disposition": "review",
+      "doc_type": "delivery_note",
+      "doc_type_correct": true,
+      "edge": "non_iso_dates",
+      "errors": [
+        "field document_date: expected '2026-07-21', got None"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-21",
+          "extracted": null,
+          "match": false
+        },
+        "document_number": {
+          "expected": "DN-2026-3458",
+          "extracted": "DN-2026-3458",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0611",
+          "extracted": "RFQ-2026-0611",
+          "match": true
+        },
+        "seller": {
+          "expected": "Baltic Seals OU",
+          "extracted": "Baltic Seals OU",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "dn04_weird_date",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8611,
+      "disposition": "review",
+      "doc_type": "delivery_note",
+      "doc_type_correct": true,
+      "edge": "zero_quantity_row",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-23",
+          "extracted": "2026-07-23",
+          "match": true
+        },
+        "document_number": {
+          "expected": "DN-2026-3952",
+          "extracted": "DN-2026-3952",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0719",
+          "extracted": "RFQ-2026-0719",
+          "match": true
+        },
+        "seller": {
+          "expected": "Werra Kleinteile GmbH",
+          "extracted": "Werra Kleinteile GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "dn05_zero_qty_backorder",
+      "items": {
+        "expected": 3,
+        "fn": 0,
+        "fp": 0,
+        "tp": 3
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8786,
+      "disposition": "review",
+      "doc_type": "delivery_note",
+      "doc_type_correct": true,
+      "edge": "partial_delivery_note_in_qty",
+      "errors": [
+        "line item 'Steel angle 40x40x4 S235': missed or extracted wrong"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-22",
+          "extracted": "2026-07-22",
+          "match": true
+        },
+        "document_number": {
+          "expected": "DN-2026-1960",
+          "extracted": "DN-2026-1960",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0522",
+          "extracted": "RFQ-2026-0522",
+          "match": true
+        },
+        "seller": {
+          "expected": "Rheinland Metallbau AG",
+          "extracted": "Rheinland Metallbau AG",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "dn06_partial_delivery",
+      "items": {
+        "expected": 2,
+        "fn": 1,
+        "fp": 0,
+        "tp": 1
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.9393,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "clean",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-18",
+          "extracted": "2026-07-18",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-2658",
+          "extracted": "INV-2026-2658",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-17",
+          "extracted": "2026-08-17",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0417",
+          "extracted": "RFQ-2026-0417",
+          "match": true
+        },
+        "seller": {
+          "expected": "Nordwind Stahlhandel GmbH",
+          "extracted": "Nordwind Stahlhandel GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv01_clean_eur",
+      "items": {
+        "expected": 3,
+        "fn": 0,
+        "fp": 0,
+        "tp": 3
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 105.0,
+          "extracted": 105.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 19.95,
+          "extracted": 19.95,
+          "match": true
+        },
+        "total": {
+          "expected": 124.95,
+          "extracted": 124.95,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.9393,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "us_number_format",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Midwest Assembly LLC",
+          "extracted": "Midwest Assembly LLC",
+          "match": true
+        },
+        "currency": {
+          "expected": "USD",
+          "extracted": "USD",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-06-30",
+          "extracted": "2026-06-30",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-8068",
+          "extracted": "INV-2026-8068",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-07-30",
+          "extracted": "2026-07-30",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-1188",
+          "extracted": "RFQ-2026-1188",
+          "match": true
+        },
+        "seller": {
+          "expected": "Great Lakes Fastener Inc",
+          "extracted": "Great Lakes Fastener Inc",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv02_clean_usd",
+      "items": {
+        "expected": 3,
+        "fn": 0,
+        "fp": 0,
+        "tp": 3
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 3452.0,
+          "extracted": 3452.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 276.16,
+          "extracted": 276.16,
+          "match": true
+        },
+        "total": {
+          "expected": 3728.16,
+          "extracted": 3728.16,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.9369,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "eu_decimal_comma",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-02",
+          "extracted": "2026-07-02",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-6920",
+          "extracted": "INV-2026-6920",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-01",
+          "extracted": "2026-08-01",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0522",
+          "extracted": "RFQ-2026-0522",
+          "match": true
+        },
+        "seller": {
+          "expected": "Rheinland Metallbau AG",
+          "extracted": "Rheinland Metallbau AG",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv03_eu_numbers",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 714.0,
+          "extracted": 714.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 135.66,
+          "extracted": 135.66,
+          "match": true
+        },
+        "total": {
+          "expected": 849.66,
+          "extracted": 849.66,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.9369,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "unicode_names",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Årdal Verft AS",
+          "extracted": "Årdal Verft AS",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-10",
+          "extracted": "2026-07-10",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-4640",
+          "extracted": "INV-2026-4640",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-09",
+          "extracted": "2026-08-09",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0733",
+          "extracted": "RFQ-2026-0733",
+          "match": true
+        },
+        "seller": {
+          "expected": "Müller & Söhne GmbH",
+          "extracted": "Müller & Söhne GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv04_unicode_names",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 192.0,
+          "extracted": 192.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 36.48,
+          "extracted": 36.48,
+          "match": true
+        },
+        "total": {
+          "expected": 228.48,
+          "extracted": 228.48,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.94,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "no_subtotal_line",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-21",
+          "extracted": "2026-07-21",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-3981",
+          "extracted": "INV-2026-3981",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-20",
+          "extracted": "2026-08-20",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0611",
+          "extracted": "RFQ-2026-0611",
+          "match": true
+        },
+        "seller": {
+          "expected": "Baltic Seals OU",
+          "extracted": "Baltic Seals OU",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv05_total_only",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "total": {
+          "expected": 96.0,
+          "extracted": 96.0,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.9342,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "clean",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-05",
+          "extracted": "2026-07-05",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-5383",
+          "extracted": "INV-2026-5383",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-04",
+          "extracted": "2026-08-04",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0489",
+          "extracted": "RFQ-2026-0489",
+          "match": true
+        },
+        "seller": {
+          "expected": "Hanse Schmierstoffe GmbH",
+          "extracted": "Hanse Schmierstoffe GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv06_single_item",
+      "items": {
+        "expected": 1,
+        "fn": 0,
+        "fp": 0,
+        "tp": 1
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 126.0,
+          "extracted": 126.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 23.94,
+          "extracted": 23.94,
+          "match": true
+        },
+        "total": {
+          "expected": 149.94,
+          "extracted": 149.94,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.9413,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "negative_discount_line",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-12",
+          "extracted": "2026-07-12",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-2041",
+          "extracted": "INV-2026-2041",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-11",
+          "extracted": "2026-08-11",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0655",
+          "extracted": "RFQ-2026-0655",
+          "match": true
+        },
+        "seller": {
+          "expected": "Verpackung Direkt GmbH",
+          "extracted": "Verpackung Direkt GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv07_discount_row",
+      "items": {
+        "expected": 4,
+        "fn": 0,
+        "fp": 0,
+        "tp": 4
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 255.0,
+          "extracted": 255.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 48.45,
+          "extracted": 48.45,
+          "match": true
+        },
+        "total": {
+          "expected": 303.45,
+          "extracted": 303.45,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.9345,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "non_iso_dates",
+      "errors": [
+        "field document_date: expected '2026-07-18', got None",
+        "field due_date: expected '2026-08-17', got None"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-18",
+          "extracted": null,
+          "match": false
+        },
+        "document_number": {
+          "expected": "INV-2026-8784",
+          "extracted": "INV-2026-8784",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-17",
+          "extracted": null,
+          "match": false
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0702",
+          "extracted": "RFQ-2026-0702",
+          "match": true
+        },
+        "seller": {
+          "expected": "Schwarzwald Drehteile GmbH",
+          "extracted": "Schwarzwald Drehteile GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "inv08_weird_dates",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 51.0,
+          "extracted": 51.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 9.69,
+          "extracted": 9.69,
+          "match": true
+        },
+        "total": {
+          "expected": 60.69,
+          "extracted": 60.69,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.91,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "multi_currency_mention",
+      "errors": [
+        "field currency: expected 'USD', got 'EUR'"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "USD",
+          "extracted": "EUR",
+          "match": false
+        },
+        "document_date": {
+          "expected": "2026-07-15",
+          "extracted": "2026-07-15",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-6840",
+          "extracted": "INV-2026-6840",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-14",
+          "extracted": "2026-08-14",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0641",
+          "extracted": "RFQ-2026-0641",
+          "match": true
+        },
+        "seller": {
+          "expected": "Atlantic Bearing Supply Inc",
+          "extracted": "Atlantic Bearing Supply Inc",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "inv09_multicurrency",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 350.0,
+          "extracted": 350.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 24.5,
+          "extracted": 24.5,
+          "match": true
+        },
+        "total": {
+          "expected": 374.5,
+          "extracted": 374.5,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.9369,
+      "disposition": "auto_post",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "eu_thousands_qty",
+      "errors": [
+        "line item 'Hex bolt M8x40 DIN 933': wrong or spurious",
+        "line item 'Washer M8 DIN 125': wrong or spurious",
+        "line item 'Hex bolt M8x40 DIN 933': missed or extracted wrong",
+        "line item 'Washer M8 DIN 125': missed or extracted wrong"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-08",
+          "extracted": "2026-07-08",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-2460",
+          "extracted": "INV-2026-2460",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-07",
+          "extracted": "2026-08-07",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0598",
+          "extracted": "RFQ-2026-0598",
+          "match": true
+        },
+        "seller": {
+          "expected": "Donau Schrauben AG",
+          "extracted": "Donau Schrauben AG",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "inv10_eu_thousands",
+      "items": {
+        "expected": 2,
+        "fn": 2,
+        "fp": 2,
+        "tp": 0
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 170.0,
+          "extracted": 170.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 32.3,
+          "extracted": 32.3,
+          "match": true
+        },
+        "total": {
+          "expected": 202.3,
+          "extracted": 202.3,
+          "match": true
+        }
+      },
+      "totals_validated": true
+    },
+    {
+      "confidence": 0.913,
+      "disposition": "review",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "missing_totals",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-19",
+          "extracted": "2026-07-19",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-9247",
+          "extracted": "INV-2026-9247",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-18",
+          "extracted": "2026-08-18",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0688",
+          "extracted": "RFQ-2026-0688",
+          "match": true
+        },
+        "seller": {
+          "expected": "Alpen Profile GmbH",
+          "extracted": "Alpen Profile GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv11_missing_totals",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8843,
+      "disposition": "review",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "stated_totals_mismatch",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-22",
+          "extracted": "2026-07-22",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-3174",
+          "extracted": "INV-2026-3174",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-21",
+          "extracted": "2026-08-21",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0417",
+          "extracted": "RFQ-2026-0417",
+          "match": true
+        },
+        "seller": {
+          "expected": "Nordwind Stahlhandel GmbH",
+          "extracted": "Nordwind Stahlhandel GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "inv12_totals_mismatch",
+      "items": {
+        "expected": 3,
+        "fn": 0,
+        "fp": 0,
+        "tp": 3
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 150.0,
+          "extracted": 150.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 28.5,
+          "extracted": 28.5,
+          "match": true
+        },
+        "total": {
+          "expected": 178.5,
+          "extracted": 178.5,
+          "match": true
+        }
+      },
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8629,
+      "disposition": "review",
+      "doc_type": "invoice",
+      "doc_type_correct": true,
+      "edge": "qty_price_only_columns",
+      "errors": [
+        "line item 'Hex bolt M8x40 DIN 933': wrong or spurious",
+        "line item 'Hex nut M8 DIN 934': wrong or spurious",
+        "line item 'Washer M8 DIN 125': wrong or spurious",
+        "line item 'Hex bolt M8x40 DIN 933': missed or extracted wrong",
+        "line item 'Hex nut M8 DIN 934': missed or extracted wrong",
+        "line item 'Washer M8 DIN 125': missed or extracted wrong"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-24",
+          "extracted": "2026-07-24",
+          "match": true
+        },
+        "document_number": {
+          "expected": "INV-2026-7618",
+          "extracted": "INV-2026-7618",
+          "match": true
+        },
+        "due_date": {
+          "expected": "2026-08-23",
+          "extracted": "2026-08-23",
+          "match": true
+        },
+        "order_reference": {
+          "expected": "RFQ-2026-0719",
+          "extracted": "RFQ-2026-0719",
+          "match": true
+        },
+        "seller": {
+          "expected": "Werra Kleinteile GmbH",
+          "extracted": "Werra Kleinteile GmbH",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "inv13_no_amount_column",
+      "items": {
+        "expected": 3,
+        "fn": 3,
+        "fp": 3,
+        "tp": 0
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {
+        "subtotal": {
+          "expected": 84.0,
+          "extracted": 84.0,
+          "match": true
+        },
+        "tax": {
+          "expected": 15.96,
+          "extracted": 15.96,
+          "match": true
+        },
+        "total": {
+          "expected": 99.96,
+          "extracted": 99.96,
+          "match": true
+        }
+      },
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8756,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "clean",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-20",
+          "extracted": "2026-07-20",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0801",
+          "extracted": "RFQ-2026-0801",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-08-10",
+          "extracted": "2026-08-10",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "rfq01_clean",
+      "items": {
+        "expected": 3,
+        "fn": 0,
+        "fp": 0,
+        "tp": 3
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8413,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "unicode_names",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Fábrica de Componentes García S.L.",
+          "extracted": "Fábrica de Componentes García S.L.",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-21",
+          "extracted": "2026-07-21",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0815",
+          "extracted": "RFQ-2026-0815",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-08-12",
+          "extracted": "2026-08-12",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "rfq02_unicode_contact",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.885,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "noisy_phrasing",
+      "errors": [
+        "field document_date: spurious (not on the document)"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Baltika Assembly OU",
+          "extracted": "Baltika Assembly OU",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0822",
+          "extracted": "RFQ-2026-0822",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-09-15",
+          "extracted": "2026-09-15",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "rfq03_noisy_no_header_date",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [
+        "document_date"
+      ],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8829,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "non_iso_dates",
+      "errors": [
+        "field requested_delivery_date: expected '2026-09-01', got None"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Midwest Assembly LLC",
+          "extracted": "Midwest Assembly LLC",
+          "match": true
+        },
+        "currency": {
+          "expected": "USD",
+          "extracted": "USD",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-08-28",
+          "extracted": "2026-08-28",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0830",
+          "extracted": "RFQ-2026-0830",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-09-01",
+          "extracted": null,
+          "match": false
+        }
+      },
+      "fully_correct": false,
+      "id": "rfq04_weird_date",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8757,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "no_currency_stated",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Alpen Profile GmbH",
+          "extracted": "Alpen Profile GmbH",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-23",
+          "extracted": "2026-07-23",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0841",
+          "extracted": "RFQ-2026-0841",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-08-20",
+          "extracted": "2026-08-20",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "rfq05_no_currency",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8471,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "multi_currency_mention",
+      "errors": [
+        "field currency: spurious (not on the document)"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-24",
+          "extracted": "2026-07-24",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0850",
+          "extracted": "RFQ-2026-0850",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-08-25",
+          "extracted": "2026-08-25",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "rfq06_multicurrency",
+      "items": {
+        "expected": 1,
+        "fn": 0,
+        "fp": 0,
+        "tp": 1
+      },
+      "spurious_fields": [
+        "currency"
+      ],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.8756,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "mixed_units",
+      "errors": [],
+      "fields": {
+        "buyer": {
+          "expected": "Acme Industrial GmbH",
+          "extracted": "Acme Industrial GmbH",
+          "match": true
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-25",
+          "extracted": "2026-07-25",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0860",
+          "extracted": "RFQ-2026-0860",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-08-30",
+          "extracted": "2026-08-30",
+          "match": true
+        }
+      },
+      "fully_correct": true,
+      "id": "rfq07_mixed_units",
+      "items": {
+        "expected": 3,
+        "fn": 0,
+        "fp": 0,
+        "tp": 3
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    },
+    {
+      "confidence": 0.885,
+      "disposition": "review",
+      "doc_type": "rfq",
+      "doc_type_correct": true,
+      "edge": "inline_deliver_to",
+      "errors": [
+        "field buyer: expected 'Baltika Assembly OU', got 'Baltika Assembly OU, Harju 4, 10130 Tallinn, Estonia'"
+      ],
+      "fields": {
+        "buyer": {
+          "expected": "Baltika Assembly OU",
+          "extracted": "Baltika Assembly OU, Harju 4, 10130 Tallinn, Estonia",
+          "match": false
+        },
+        "currency": {
+          "expected": "EUR",
+          "extracted": "EUR",
+          "match": true
+        },
+        "document_date": {
+          "expected": "2026-07-26",
+          "extracted": "2026-07-26",
+          "match": true
+        },
+        "document_number": {
+          "expected": "RFQ-2026-0871",
+          "extracted": "RFQ-2026-0871",
+          "match": true
+        },
+        "requested_delivery_date": {
+          "expected": "2026-09-05",
+          "extracted": "2026-09-05",
+          "match": true
+        }
+      },
+      "fully_correct": false,
+      "id": "rfq08_inline_deliver_to",
+      "items": {
+        "expected": 2,
+        "fn": 0,
+        "fp": 0,
+        "tp": 2
+      },
+      "spurious_fields": [],
+      "spurious_totals": [],
+      "totals": {},
+      "totals_validated": false
+    }
+  ],
+  "documents_scored": 27,
+  "field_accuracy": {
+    "doc_type": {
+      "accuracy": 1.0,
+      "correct": 27,
+      "expected": 27
+    },
+    "fields": {
+      "buyer": {
+        "accuracy": 0.963,
+        "correct": 26,
+        "expected": 27,
+        "spurious": 0
+      },
+      "currency": {
+        "accuracy": 0.9474,
+        "correct": 18,
+        "expected": 19,
+        "spurious": 2
+      },
+      "document_date": {
+        "accuracy": 0.9231,
+        "correct": 24,
+        "expected": 26,
+        "spurious": 1
+      },
+      "document_number": {
+        "accuracy": 1.0,
+        "correct": 27,
+        "expected": 27,
+        "spurious": 0
+      },
+      "due_date": {
+        "accuracy": 0.9231,
+        "correct": 12,
+        "expected": 13,
+        "spurious": 0
+      },
+      "order_reference": {
+        "accuracy": 1.0,
+        "correct": 18,
+        "expected": 18,
+        "spurious": 0
+      },
+      "requested_delivery_date": {
+        "accuracy": 0.875,
+        "correct": 7,
+        "expected": 8,
+        "spurious": 0
+      },
+      "seller": {
+        "accuracy": 1.0,
+        "correct": 19,
+        "expected": 19,
+        "spurious": 0
+      }
+    }
+  },
+  "gate": {
+    "auto_post": 10,
+    "auto_post_fully_correct": 7,
+    "auto_post_misses": [
+      "inv08_weird_dates",
+      "inv09_multicurrency",
+      "inv10_eu_thousands"
+    ],
+    "auto_post_precision": 0.7,
+    "review": 17,
+    "review_clean_extractions": 9,
+    "review_error_ids": [
+      "dn03_no_order_ref",
+      "dn04_weird_date",
+      "dn06_partial_delivery",
+      "inv13_no_amount_column",
+      "rfq03_noisy_no_header_date",
+      "rfq04_weird_date",
+      "rfq06_multicurrency",
+      "rfq08_inline_deliver_to"
+    ],
+    "review_with_extraction_errors": 8,
+    "threshold": 0.85
+  },
+  "gate_threshold": 0.85,
+  "line_items": {
+    "f1": 0.9106,
+    "fn": 6,
+    "fp": 5,
+    "precision": 0.918,
+    "recall": 0.9032,
+    "tp": 56
+  },
+  "sweep": {
+    "min_threshold_for_100pct": {
+      "auto_post": 4,
+      "fully_correct": 4,
+      "precision": 1.0,
+      "threshold": 0.9393
+    },
+    "points": [
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8313
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8413
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8471
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.85
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.86
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8611
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8629
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8688
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8756
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8757
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8786
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8829
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.8843
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.885
+      },
+      {
+        "auto_post": 10,
+        "fully_correct": 7,
+        "precision": 0.7,
+        "threshold": 0.91
+      },
+      {
+        "auto_post": 9,
+        "fully_correct": 7,
+        "precision": 0.7778,
+        "threshold": 0.913
+      },
+      {
+        "auto_post": 9,
+        "fully_correct": 7,
+        "precision": 0.7778,
+        "threshold": 0.9342
+      },
+      {
+        "auto_post": 8,
+        "fully_correct": 6,
+        "precision": 0.75,
+        "threshold": 0.9345
+      },
+      {
+        "auto_post": 7,
+        "fully_correct": 6,
+        "precision": 0.8571,
+        "threshold": 0.9369
+      },
+      {
+        "auto_post": 4,
+        "fully_correct": 4,
+        "precision": 1.0,
+        "threshold": 0.9393
+      },
+      {
+        "auto_post": 2,
+        "fully_correct": 2,
+        "precision": 1.0,
+        "threshold": 0.94
+      },
+      {
+        "auto_post": 1,
+        "fully_correct": 1,
+        "precision": 1.0,
+        "threshold": 0.9413
+      }
+    ]
+  },
+  "totals_accuracy": {
+    "subtotal": {
+      "accuracy": 1.0,
+      "correct": 11,
+      "expected": 11,
+      "spurious": 0
+    },
+    "tax": {
+      "accuracy": 1.0,
+      "correct": 11,
+      "expected": 11,
+      "spurious": 0
+    },
+    "total": {
+      "accuracy": 1.0,
+      "correct": 12,
+      "expected": 12,
+      "spurious": 0
+    }
+  }
+}
