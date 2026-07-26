@@ -1,0 +1,23 @@
+DELIVERY NOTE
+
+Werra Kleinteile GmbH
+Muehlweg 7
+36266 Heringen, Germany
+
+Deliver To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Delivery Note No: DN-2026-3952
+Delivery Date: 2026-07-23
+Order Reference: RFQ-2026-0719
+
+Pos   Description                              Qty    Unit
+1     Hex bolt M8x40 DIN 933                   400             pcs
+2     Hex nut M8 DIN 934                       400             pcs
+3     Washer M8 DIN 125                          0             pcs
+
+Position 3 backordered; balance follows next week.
+
+Goods received in good condition. Please sign and return one copy.

@@ -1,0 +1,29 @@
+{
+  "doc_type": "invoice",
+  "edge": "clean",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-05",
+    "document_number": "INV-2026-5383",
+    "due_date": "2026-08-04",
+    "order_reference": "RFQ-2026-0489",
+    "seller": "Hanse Schmierstoffe GmbH"
+  },
+  "id": "inv06_single_item",
+  "line_items": [
+    {
+      "amount": 126.0,
+      "description": "Machine oil ISO VG 46",
+      "position": 1,
+      "quantity": 30,
+      "unit": null,
+      "unit_price": 4.2
+    }
+  ],
+  "totals": {
+    "subtotal": 126.0,
+    "tax": 23.94,
+    "total": 149.94
+  }
+}

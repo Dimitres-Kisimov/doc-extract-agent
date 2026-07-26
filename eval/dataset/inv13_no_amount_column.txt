@@ -1,0 +1,27 @@
+INVOICE
+
+Werra Kleinteile GmbH
+Muehlweg 7
+36266 Heringen, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-7618
+Invoice Date: 2026-07-24
+Due Date: 2026-08-23
+Order Reference: RFQ-2026-0719
+Currency: EUR
+
+Line  Description                              Qty      Unit Price
+1     Hex bolt M8x40 DIN 933                   400            0.12
+2     Hex nut M8 DIN 934                       400            0.05
+3     Washer M8 DIN 125                        800            0.02
+
+Subtotal:      84.00
+VAT (19%):     15.96
+Total:         99.96
+
+Payment terms: 30 days net. Please reference the invoice number with payment.

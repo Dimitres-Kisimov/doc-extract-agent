@@ -1,0 +1,20 @@
+DELIVERY NOTE
+
+Baltic Seals OU
+Peterburi tee 46
+11415 Tallinn, Estonia
+
+Deliver To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Delivery Note No: DN-2026-3458
+Delivery Date: 21 July 2026
+Order Reference: RFQ-2026-0611
+
+Pos   Description                              Qty    Unit
+1     Sealing ring NBR 25x35x7                 120             pcs
+2     Cable tie 300mm black                   1000             pcs
+
+Goods received in good condition. Please sign and return one copy.

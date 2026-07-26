@@ -1,0 +1,37 @@
+{
+  "doc_type": "invoice",
+  "edge": "eu_decimal_comma",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-02",
+    "document_number": "INV-2026-6920",
+    "due_date": "2026-08-01",
+    "order_reference": "RFQ-2026-0522",
+    "seller": "Rheinland Metallbau AG"
+  },
+  "id": "inv03_eu_numbers",
+  "line_items": [
+    {
+      "amount": 462.0,
+      "description": "Steel angle 40x40x4 S235",
+      "position": 1,
+      "quantity": 120,
+      "unit": null,
+      "unit_price": 3.85
+    },
+    {
+      "amount": 252.0,
+      "description": "Machine oil ISO VG 46",
+      "position": 2,
+      "quantity": 60,
+      "unit": null,
+      "unit_price": 4.2
+    }
+  ],
+  "totals": {
+    "subtotal": 714.0,
+    "tax": 135.66,
+    "total": 849.66
+  }
+}

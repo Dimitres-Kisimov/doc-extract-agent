@@ -1,0 +1,31 @@
+{
+  "doc_type": "delivery_note",
+  "edge": "non_iso_dates",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "document_date": "2026-07-21",
+    "document_number": "DN-2026-3458",
+    "order_reference": "RFQ-2026-0611",
+    "seller": "Baltic Seals OU"
+  },
+  "id": "dn04_weird_date",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Sealing ring NBR 25x35x7",
+      "position": 1,
+      "quantity": 120,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Cable tie 300mm black",
+      "position": 2,
+      "quantity": 1000,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

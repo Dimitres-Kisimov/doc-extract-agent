@@ -1,0 +1,22 @@
+From: einkauf@alpen-profile.example
+To: vertrieb@donau-schrauben.example
+Subject: Request for Quotation - RFQ-2026-0841
+Date: 2026-07-23
+
+Dear team,
+
+Please quote the following positions with your standard conditions.
+
+Pos   Description                              Qty    Unit
+1     Hex bolt M8x40 DIN 933                  1500             pcs
+2     Washer M8 DIN 125                       3000             pcs
+
+Deliver to:
+Alpen Profile GmbH
+Gewerbepark 12
+87700 Memmingen, Germany
+Requested delivery date: 2026-08-20
+
+Mit freundlichen Gruessen,
+Jonas Beck
+Einkauf

@@ -1,0 +1,31 @@
+{
+  "doc_type": "rfq",
+  "edge": "non_iso_dates",
+  "fields": {
+    "buyer": "Midwest Assembly LLC",
+    "currency": "USD",
+    "document_date": "2026-08-28",
+    "document_number": "RFQ-2026-0830",
+    "requested_delivery_date": "2026-09-01"
+  },
+  "id": "rfq04_weird_date",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Bearing 6204-2RS",
+      "position": 1,
+      "quantity": 500,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Pallet EUR 1200x800",
+      "position": 2,
+      "quantity": 24,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

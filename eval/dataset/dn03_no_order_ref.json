@@ -1,0 +1,30 @@
+{
+  "doc_type": "delivery_note",
+  "edge": "missing_order_reference",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "document_date": "2026-07-14",
+    "document_number": "DN-2026-2263",
+    "seller": "Verpackung Direkt GmbH"
+  },
+  "id": "dn03_no_order_ref",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Corrugated box 400x300x200",
+      "position": 1,
+      "quantity": 200,
+      "unit": "boxes",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Pallet EUR 1200x800",
+      "position": 2,
+      "quantity": 10,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

@@ -1,0 +1,25 @@
+INVOICE
+
+Hanse Schmierstoffe GmbH
+Am Kai 9
+28217 Bremen, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-5383
+Invoice Date: 2026-07-05
+Due Date: 2026-08-04
+Order Reference: RFQ-2026-0489
+Currency: EUR
+
+Line  Description                              Qty      Unit Price          Amount
+1     Machine oil ISO VG 46                     30            4.20          126.00
+
+Subtotal:      126.00
+VAT (19%):     23.94
+Total:         149.94
+
+Payment terms: 30 days net. Please reference the invoice number with payment.

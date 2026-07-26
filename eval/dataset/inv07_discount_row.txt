@@ -1,0 +1,28 @@
+INVOICE
+
+Verpackung Direkt GmbH
+Industriering 44
+68199 Mannheim, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-2041
+Invoice Date: 2026-07-12
+Due Date: 2026-08-11
+Order Reference: RFQ-2026-0655
+Currency: EUR
+
+Line  Description                              Qty      Unit Price          Amount
+1     Corrugated box 400x300x200               200            0.85          170.00
+2     Pallet EUR 1200x800                       10            9.50           95.00
+3     Cable tie 300mm black                    500            0.03           15.00
+4     Early payment discount                     1          -25.00          -25.00
+
+Subtotal:      255.00
+VAT (19%):     48.45
+Total:         303.45
+
+Payment terms: 30 days net. Please reference the invoice number with payment.

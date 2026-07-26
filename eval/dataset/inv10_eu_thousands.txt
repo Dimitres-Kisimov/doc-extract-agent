@@ -1,0 +1,26 @@
+INVOICE
+
+Donau Schrauben AG
+Werftstrasse 2
+93059 Regensburg, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-2460
+Invoice Date: 2026-07-08
+Due Date: 2026-08-07
+Order Reference: RFQ-2026-0598
+Currency: EUR
+
+Line  Description                              Qty      Unit Price          Amount
+1     Hex bolt M8x40 DIN 933                 1.000            0,12          120,00
+2     Washer M8 DIN 125                      2.500            0,02           50,00
+
+Subtotal:      170,00
+VAT (19%):     32,30
+Total:         202,30
+
+Payment terms: 30 days net. Please reference the invoice number with payment.

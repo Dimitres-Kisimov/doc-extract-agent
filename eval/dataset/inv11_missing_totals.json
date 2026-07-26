@@ -1,0 +1,33 @@
+{
+  "doc_type": "invoice",
+  "edge": "missing_totals",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-19",
+    "document_number": "INV-2026-9247",
+    "due_date": "2026-08-18",
+    "order_reference": "RFQ-2026-0688",
+    "seller": "Alpen Profile GmbH"
+  },
+  "id": "inv11_missing_totals",
+  "line_items": [
+    {
+      "amount": 308.0,
+      "description": "Steel angle 40x40x4 S235",
+      "position": 1,
+      "quantity": 80,
+      "unit": null,
+      "unit_price": 3.85
+    },
+    {
+      "amount": 84.0,
+      "description": "Machine oil ISO VG 46",
+      "position": 2,
+      "quantity": 20,
+      "unit": null,
+      "unit_price": 4.2
+    }
+  ],
+  "totals": {}
+}

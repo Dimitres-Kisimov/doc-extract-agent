@@ -1,0 +1,37 @@
+{
+  "doc_type": "invoice",
+  "edge": "non_iso_dates",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-18",
+    "document_number": "INV-2026-8784",
+    "due_date": "2026-08-17",
+    "order_reference": "RFQ-2026-0702",
+    "seller": "Schwarzwald Drehteile GmbH"
+  },
+  "id": "inv08_weird_dates",
+  "line_items": [
+    {
+      "amount": 36.0,
+      "description": "Hex bolt M8x40 DIN 933",
+      "position": 1,
+      "quantity": 300,
+      "unit": null,
+      "unit_price": 0.12
+    },
+    {
+      "amount": 15.0,
+      "description": "Hex nut M8 DIN 934",
+      "position": 2,
+      "quantity": 300,
+      "unit": null,
+      "unit_price": 0.05
+    }
+  ],
+  "totals": {
+    "subtotal": 51.0,
+    "tax": 9.69,
+    "total": 60.69
+  }
+}

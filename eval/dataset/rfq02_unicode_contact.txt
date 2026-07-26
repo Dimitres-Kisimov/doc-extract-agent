@@ -1,0 +1,23 @@
+From: compras@garcia-componentes.example
+To: ventas@iberica-tornillos.example
+Subject: Request for Quotation - RFQ-2026-0815
+Date: 2026-07-21
+
+Dear Ms. García,
+
+We kindly request your quotation for the positions below.
+
+Pos   Description                              Qty    Unit
+1     Sealing ring NBR 25x35x7                 300             pcs
+2     Bearing 6204-2RS                          60             pcs
+
+Deliver to:
+Fábrica de Componentes García S.L.
+Calle Mayor 8
+28013 Madrid, Spain
+Requested delivery date: 2026-08-12
+Please quote all prices in EUR including packaging.
+
+Saludos cordiales,
+Ilinca Pîrvu
+Compras

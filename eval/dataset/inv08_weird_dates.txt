@@ -1,0 +1,26 @@
+INVOICE
+
+Schwarzwald Drehteile GmbH
+Talstrasse 8
+78120 Furtwangen, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-8784
+Invoice Date: 18.07.2026
+Due Date: 17.08.2026
+Order Reference: RFQ-2026-0702
+Currency: EUR
+
+Line  Description                              Qty      Unit Price          Amount
+1     Hex bolt M8x40 DIN 933                   300            0.12           36.00
+2     Hex nut M8 DIN 934                       300            0.05           15.00
+
+Subtotal:      51.00
+VAT (19%):     9.69
+Total:         60.69
+
+Payment terms: 30 days net. Please reference the invoice number with payment.

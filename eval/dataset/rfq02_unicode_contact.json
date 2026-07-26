@@ -1,0 +1,31 @@
+{
+  "doc_type": "rfq",
+  "edge": "unicode_names",
+  "fields": {
+    "buyer": "Fábrica de Componentes García S.L.",
+    "currency": "EUR",
+    "document_date": "2026-07-21",
+    "document_number": "RFQ-2026-0815",
+    "requested_delivery_date": "2026-08-12"
+  },
+  "id": "rfq02_unicode_contact",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Sealing ring NBR 25x35x7",
+      "position": 1,
+      "quantity": 300,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Bearing 6204-2RS",
+      "position": 2,
+      "quantity": 60,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

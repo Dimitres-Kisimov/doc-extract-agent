@@ -1,0 +1,24 @@
+From: procurement@acme-industrial.example
+To: sales@atlantic-bearing.example
+Subject: Request for Quotation - RFQ-2026-0850
+Date: 2026-07-24
+
+Dear Sales Team,
+
+We would like to request a quotation for the following items. Please provide
+your best pricing and lead times at your earliest convenience.
+
+Pos   Description                              Qty    Unit
+1     Bearing 6204-2RS                         200             pcs
+
+Deliver to:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+Requested delivery date: 2026-08-25
+You may quote in either EUR or USD, whichever is simpler for you.
+
+Best regards,
+Maria Schmidt
+Procurement Department
+Acme Industrial GmbH

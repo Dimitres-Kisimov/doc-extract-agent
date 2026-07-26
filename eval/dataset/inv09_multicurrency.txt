@@ -1,0 +1,25 @@
+INVOICE
+
+Atlantic Bearing Supply Inc
+77 Harbor Blvd
+Boston, MA 02110, USA
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-6840
+Invoice Date: 2026-07-15
+Due Date: 2026-08-14
+Order Reference: RFQ-2026-0641
+
+Line  Description                              Qty      Unit Price          Amount
+1     Bearing 6204-2RS                         100            2.40          240.00
+2     Sealing ring NBR 25x35x7                 200            0.55          110.00
+
+Subtotal:      350.00
+Sales Tax (7%):     24.50
+Total:         374.50
+
+All prices in USD; EUR settlement available on request.

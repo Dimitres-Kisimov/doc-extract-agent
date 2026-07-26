@@ -1,0 +1,19 @@
+DELIVERY NOTE
+
+Verpackung Direkt GmbH
+Industriering 44
+68199 Mannheim, Germany
+
+Deliver To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Delivery Note No: DN-2026-2263
+Delivery Date: 2026-07-14
+
+Pos   Description                              Qty    Unit
+1     Corrugated box 400x300x200               200           boxes
+2     Pallet EUR 1200x800                       10             pcs
+
+Goods received in good condition. Please sign and return one copy.

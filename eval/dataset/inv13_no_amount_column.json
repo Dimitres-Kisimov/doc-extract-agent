@@ -1,0 +1,45 @@
+{
+  "doc_type": "invoice",
+  "edge": "qty_price_only_columns",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-24",
+    "document_number": "INV-2026-7618",
+    "due_date": "2026-08-23",
+    "order_reference": "RFQ-2026-0719",
+    "seller": "Werra Kleinteile GmbH"
+  },
+  "id": "inv13_no_amount_column",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Hex bolt M8x40 DIN 933",
+      "position": 1,
+      "quantity": 400,
+      "unit": null,
+      "unit_price": 0.12
+    },
+    {
+      "amount": null,
+      "description": "Hex nut M8 DIN 934",
+      "position": 2,
+      "quantity": 400,
+      "unit": null,
+      "unit_price": 0.05
+    },
+    {
+      "amount": null,
+      "description": "Washer M8 DIN 125",
+      "position": 3,
+      "quantity": 800,
+      "unit": null,
+      "unit_price": 0.02
+    }
+  ],
+  "totals": {
+    "subtotal": 84.0,
+    "tax": 15.96,
+    "total": 99.96
+  }
+}

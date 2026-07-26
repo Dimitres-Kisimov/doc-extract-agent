@@ -1,0 +1,45 @@
+{
+  "doc_type": "invoice",
+  "edge": "us_number_format",
+  "fields": {
+    "buyer": "Midwest Assembly LLC",
+    "currency": "USD",
+    "document_date": "2026-06-30",
+    "document_number": "INV-2026-8068",
+    "due_date": "2026-07-30",
+    "order_reference": "RFQ-2026-1188",
+    "seller": "Great Lakes Fastener Inc"
+  },
+  "id": "inv02_clean_usd",
+  "line_items": [
+    {
+      "amount": 3000.0,
+      "description": "Bearing 6204-2RS",
+      "position": 1,
+      "quantity": 1250,
+      "unit": null,
+      "unit_price": 2.4
+    },
+    {
+      "amount": 300.0,
+      "description": "Cable tie 300mm black",
+      "position": 2,
+      "quantity": 10000,
+      "unit": null,
+      "unit_price": 0.03
+    },
+    {
+      "amount": 152.0,
+      "description": "Pallet EUR 1200x800",
+      "position": 3,
+      "quantity": 16,
+      "unit": null,
+      "unit_price": 9.5
+    }
+  ],
+  "totals": {
+    "subtotal": 3452.0,
+    "tax": 276.16,
+    "total": 3728.16
+  }
+}

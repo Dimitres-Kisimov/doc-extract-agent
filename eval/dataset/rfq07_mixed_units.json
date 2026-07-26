@@ -1,0 +1,39 @@
+{
+  "doc_type": "rfq",
+  "edge": "mixed_units",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-25",
+    "document_number": "RFQ-2026-0860",
+    "requested_delivery_date": "2026-08-30"
+  },
+  "id": "rfq07_mixed_units",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Machine oil ISO VG 46",
+      "position": 1,
+      "quantity": 12.5,
+      "unit": "l",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Corrugated box 400x300x200",
+      "position": 2,
+      "quantity": 40,
+      "unit": "boxes",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Steel angle 40x40x4 S235",
+      "position": 3,
+      "quantity": 60,
+      "unit": "m",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

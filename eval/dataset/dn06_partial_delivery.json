@@ -1,0 +1,31 @@
+{
+  "doc_type": "delivery_note",
+  "edge": "partial_delivery_note_in_qty",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "document_date": "2026-07-22",
+    "document_number": "DN-2026-1960",
+    "order_reference": "RFQ-2026-0522",
+    "seller": "Rheinland Metallbau AG"
+  },
+  "id": "dn06_partial_delivery",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Steel angle 40x40x4 S235",
+      "position": 1,
+      "quantity": 480,
+      "unit": "m",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Machine oil ISO VG 46",
+      "position": 2,
+      "quantity": 60,
+      "unit": "l",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

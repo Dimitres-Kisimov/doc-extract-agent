@@ -1,0 +1,20 @@
+DELIVERY NOTE
+
+Iberica Tornillos SA
+Poligono Sur 21
+41007 Sevilla, Spain
+
+Deliver To:
+Construções Navais do Tejo S.A.
+Rua do Arsenal 14
+1100-038 Lisboa, Portugal
+
+Delivery Note No: DN-2026-9566
+Delivery Date: 2026-07-17
+Order Reference: RFQ-2026-0733
+
+Pos   Description                              Qty    Unit
+1     Hex bolt M8x40 DIN 933                   800             pcs
+2     Bearing 6204-2RS                          40             pcs
+
+Goods received in good condition. Please sign and return one copy.

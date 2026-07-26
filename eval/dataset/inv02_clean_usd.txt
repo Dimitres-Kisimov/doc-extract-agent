@@ -1,0 +1,27 @@
+INVOICE
+
+Great Lakes Fastener Inc
+2200 Superior Ave
+Cleveland, OH 44114, USA
+
+Bill To:
+Midwest Assembly LLC
+480 Commerce Dr
+Toledo, OH 43604, USA
+
+Invoice Number: INV-2026-8068
+Invoice Date: 2026-06-30
+Due Date: 2026-07-30
+Order Reference: RFQ-2026-1188
+Currency: USD
+
+Line  Description                              Qty      Unit Price          Amount
+1     Bearing 6204-2RS                       1,250            2.40        3,000.00
+2     Cable tie 300mm black                 10,000            0.03          300.00
+3     Pallet EUR 1200x800                       16            9.50          152.00
+
+Subtotal:      3,452.00
+Sales Tax (8%):     276.16
+Total:         3,728.16
+
+Payment terms: net 30.

@@ -1,0 +1,26 @@
+From: procurement@acme-industrial.example
+To: sales@hanse-schmierstoffe.example
+Subject: Request for Quotation - RFQ-2026-0860
+Date: 2026-07-25
+
+Dear Sales Team,
+
+We would like to request a quotation for the following items. Please provide
+your best pricing and lead times at your earliest convenience.
+
+Pos   Description                              Qty    Unit
+1     Machine oil ISO VG 46                   12.5               l
+2     Corrugated box 400x300x200                40           boxes
+3     Steel angle 40x40x4 S235                  60               m
+
+Deliver to:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+Requested delivery date: 2026-08-30
+Currency: EUR
+
+Best regards,
+Maria Schmidt
+Procurement Department
+Acme Industrial GmbH

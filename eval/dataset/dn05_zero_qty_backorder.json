@@ -1,0 +1,39 @@
+{
+  "doc_type": "delivery_note",
+  "edge": "zero_quantity_row",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "document_date": "2026-07-23",
+    "document_number": "DN-2026-3952",
+    "order_reference": "RFQ-2026-0719",
+    "seller": "Werra Kleinteile GmbH"
+  },
+  "id": "dn05_zero_qty_backorder",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Hex bolt M8x40 DIN 933",
+      "position": 1,
+      "quantity": 400,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Hex nut M8 DIN 934",
+      "position": 2,
+      "quantity": 400,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Washer M8 DIN 125",
+      "position": 3,
+      "quantity": 0,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

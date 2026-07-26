@@ -1,0 +1,22 @@
+DELIVERY NOTE
+
+Rheinland Metallbau AG
+Severinstrasse 5
+50678 Koeln, Germany
+
+Deliver To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Delivery Note No: DN-2026-1960
+Delivery Date: 2026-07-22
+Order Reference: RFQ-2026-0522
+
+Pos   Description                              Qty    Unit
+1     Steel angle 40x40x4 S235            480 of 500               m
+2     Machine oil ISO VG 46                     60               l
+
+Remaining 20 m to follow with the next shipment.
+
+Goods received in good condition. Please sign and return one copy.

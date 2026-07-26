@@ -1,0 +1,37 @@
+{
+  "doc_type": "invoice",
+  "edge": "eu_thousands_qty",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-08",
+    "document_number": "INV-2026-2460",
+    "due_date": "2026-08-07",
+    "order_reference": "RFQ-2026-0598",
+    "seller": "Donau Schrauben AG"
+  },
+  "id": "inv10_eu_thousands",
+  "line_items": [
+    {
+      "amount": 120.0,
+      "description": "Hex bolt M8x40 DIN 933",
+      "position": 1,
+      "quantity": 1000,
+      "unit": null,
+      "unit_price": 0.12
+    },
+    {
+      "amount": 50.0,
+      "description": "Washer M8 DIN 125",
+      "position": 2,
+      "quantity": 2500,
+      "unit": null,
+      "unit_price": 0.02
+    }
+  ],
+  "totals": {
+    "subtotal": 170.0,
+    "tax": 32.3,
+    "total": 202.3
+  }
+}

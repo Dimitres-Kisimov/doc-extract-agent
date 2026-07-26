@@ -1,0 +1,23 @@
+From: office@baltika-assembly.example
+To: sales@baltic-seals.example
+Subject: urgent quote needed pls - RFQ-2026-0822
+
+Hi,
+
+Hope you are doing well. We are a bit under pressure here, so apologies for
+the short notice. Could you send us your best price for the parts below?
+Our line stops next month if we do not get these ordered, thanks a lot.
+
+Pos   Description                              Qty    Unit
+1     Sealing ring NBR 25x35x7                 250             pcs
+2     Cable tie 300mm black                   2000             pcs
+
+Deliver to:
+Baltika Assembly OU
+Harju 4
+10130 Tallinn, Estonia
+Requested delivery date: 2026-09-15
+Currency: EUR
+
+Thanks,
+Priit Kask

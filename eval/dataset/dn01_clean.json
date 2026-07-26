@@ -1,0 +1,39 @@
+{
+  "doc_type": "delivery_note",
+  "edge": "clean",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "document_date": "2026-07-20",
+    "document_number": "DN-2026-1873",
+    "order_reference": "RFQ-2026-0417",
+    "seller": "Nordwind Stahlhandel GmbH"
+  },
+  "id": "dn01_clean",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Hex bolt M8x40 DIN 933",
+      "position": 1,
+      "quantity": 500,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Hex nut M8 DIN 934",
+      "position": 2,
+      "quantity": 500,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Washer M8 DIN 125",
+      "position": 3,
+      "quantity": 1000,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

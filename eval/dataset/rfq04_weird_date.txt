@@ -1,0 +1,24 @@
+From: purchasing@midwest-assembly.example
+To: sales@greatlakes-fastener.example
+Subject: Request for Quotation - RFQ-2026-0830
+Date: 2026-08-28
+
+Dear Sales Team,
+
+We would like to request a quotation for the following items. Please provide
+your best pricing and lead times at your earliest convenience.
+
+Pos   Description                              Qty    Unit
+1     Bearing 6204-2RS                         500             pcs
+2     Pallet EUR 1200x800                       24             pcs
+
+Deliver to:
+Midwest Assembly LLC
+480 Commerce Dr
+Toledo, OH 43604, USA
+Requested delivery date: 01/09/2026
+Currency: USD
+
+Regards,
+Dana Whitfield
+Purchasing

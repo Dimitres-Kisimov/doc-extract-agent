@@ -1,0 +1,53 @@
+{
+  "doc_type": "invoice",
+  "edge": "negative_discount_line",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "currency": "EUR",
+    "document_date": "2026-07-12",
+    "document_number": "INV-2026-2041",
+    "due_date": "2026-08-11",
+    "order_reference": "RFQ-2026-0655",
+    "seller": "Verpackung Direkt GmbH"
+  },
+  "id": "inv07_discount_row",
+  "line_items": [
+    {
+      "amount": 170.0,
+      "description": "Corrugated box 400x300x200",
+      "position": 1,
+      "quantity": 200,
+      "unit": null,
+      "unit_price": 0.85
+    },
+    {
+      "amount": 95.0,
+      "description": "Pallet EUR 1200x800",
+      "position": 2,
+      "quantity": 10,
+      "unit": null,
+      "unit_price": 9.5
+    },
+    {
+      "amount": 15.0,
+      "description": "Cable tie 300mm black",
+      "position": 3,
+      "quantity": 500,
+      "unit": null,
+      "unit_price": 0.03
+    },
+    {
+      "amount": -25.0,
+      "description": "Early payment discount",
+      "position": 4,
+      "quantity": 1,
+      "unit": null,
+      "unit_price": -25.0
+    }
+  ],
+  "totals": {
+    "subtotal": 255.0,
+    "tax": 48.45,
+    "total": 303.45
+  }
+}

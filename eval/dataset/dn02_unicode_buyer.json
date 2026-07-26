@@ -1,0 +1,31 @@
+{
+  "doc_type": "delivery_note",
+  "edge": "unicode_names",
+  "fields": {
+    "buyer": "Construções Navais do Tejo S.A.",
+    "document_date": "2026-07-17",
+    "document_number": "DN-2026-9566",
+    "order_reference": "RFQ-2026-0733",
+    "seller": "Iberica Tornillos SA"
+  },
+  "id": "dn02_unicode_buyer",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Hex bolt M8x40 DIN 933",
+      "position": 1,
+      "quantity": 800,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Bearing 6204-2RS",
+      "position": 2,
+      "quantity": 40,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

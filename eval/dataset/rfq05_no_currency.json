@@ -1,0 +1,30 @@
+{
+  "doc_type": "rfq",
+  "edge": "no_currency_stated",
+  "fields": {
+    "buyer": "Alpen Profile GmbH",
+    "document_date": "2026-07-23",
+    "document_number": "RFQ-2026-0841",
+    "requested_delivery_date": "2026-08-20"
+  },
+  "id": "rfq05_no_currency",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Hex bolt M8x40 DIN 933",
+      "position": 1,
+      "quantity": 1500,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Washer M8 DIN 125",
+      "position": 2,
+      "quantity": 3000,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

@@ -1,0 +1,20 @@
+From: office@baltika-assembly.example
+To: sales@verpackung-direkt.example
+Subject: Request for Quotation - RFQ-2026-0871
+Date: 2026-07-26
+
+Dear Sales Team,
+
+We would like to request a quotation for the following items. Please provide
+your best pricing and lead times at your earliest convenience.
+
+Pos   Description                              Qty    Unit
+1     Corrugated box 400x300x200               600           boxes
+2     Pallet EUR 1200x800                       12             pcs
+
+Deliver to: Baltika Assembly OU, Harju 4, 10130 Tallinn, Estonia
+Requested delivery date: 2026-09-05
+Currency: EUR
+
+Thanks,
+Priit Kask

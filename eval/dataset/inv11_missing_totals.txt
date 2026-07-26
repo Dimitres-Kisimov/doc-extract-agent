@@ -1,0 +1,23 @@
+INVOICE
+
+Alpen Profile GmbH
+Gewerbepark 12
+87700 Memmingen, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-9247
+Invoice Date: 2026-07-19
+Due Date: 2026-08-18
+Order Reference: RFQ-2026-0688
+Currency: EUR
+
+Line  Description                              Qty      Unit Price          Amount
+1     Steel angle 40x40x4 S235                  80            3.85          308.00
+2     Machine oil ISO VG 46                     20            4.20           84.00
+
+
+Totals page to follow separately with the monthly statement.

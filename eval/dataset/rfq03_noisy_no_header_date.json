@@ -1,0 +1,30 @@
+{
+  "doc_type": "rfq",
+  "edge": "noisy_phrasing",
+  "fields": {
+    "buyer": "Baltika Assembly OU",
+    "currency": "EUR",
+    "document_number": "RFQ-2026-0822",
+    "requested_delivery_date": "2026-09-15"
+  },
+  "id": "rfq03_noisy_no_header_date",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Sealing ring NBR 25x35x7",
+      "position": 1,
+      "quantity": 250,
+      "unit": "pcs",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Cable tie 300mm black",
+      "position": 2,
+      "quantity": 2000,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

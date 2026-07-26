@@ -1,0 +1,26 @@
+INVOICE
+
+Rheinland Metallbau AG
+Severinstrasse 5
+50678 Koeln, Germany
+
+Bill To:
+Acme Industrial GmbH
+Musterstrasse 12
+74653 Kunzelsau, Germany
+
+Invoice Number: INV-2026-6920
+Invoice Date: 2026-07-02
+Due Date: 2026-08-01
+Order Reference: RFQ-2026-0522
+Currency: EUR
+
+Line  Description                              Qty      Unit Price          Amount
+1     Steel angle 40x40x4 S235                 120            3,85          462,00
+2     Machine oil ISO VG 46                     60            4,20          252,00
+
+Subtotal:      714,00
+VAT (19%):     135,66
+Total:         849,66
+
+Payment terms: 30 days net. Please reference the invoice number with payment.

@@ -1,0 +1,22 @@
+{
+  "doc_type": "rfq",
+  "edge": "multi_currency_mention",
+  "fields": {
+    "buyer": "Acme Industrial GmbH",
+    "document_date": "2026-07-24",
+    "document_number": "RFQ-2026-0850",
+    "requested_delivery_date": "2026-08-25"
+  },
+  "id": "rfq06_multicurrency",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Bearing 6204-2RS",
+      "position": 1,
+      "quantity": 200,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}

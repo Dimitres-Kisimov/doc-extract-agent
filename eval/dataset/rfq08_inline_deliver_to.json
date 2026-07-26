@@ -1,0 +1,31 @@
+{
+  "doc_type": "rfq",
+  "edge": "inline_deliver_to",
+  "fields": {
+    "buyer": "Baltika Assembly OU",
+    "currency": "EUR",
+    "document_date": "2026-07-26",
+    "document_number": "RFQ-2026-0871",
+    "requested_delivery_date": "2026-09-05"
+  },
+  "id": "rfq08_inline_deliver_to",
+  "line_items": [
+    {
+      "amount": null,
+      "description": "Corrugated box 400x300x200",
+      "position": 1,
+      "quantity": 600,
+      "unit": "boxes",
+      "unit_price": null
+    },
+    {
+      "amount": null,
+      "description": "Pallet EUR 1200x800",
+      "position": 2,
+      "quantity": 12,
+      "unit": "pcs",
+      "unit_price": null
+    }
+  ],
+  "totals": {}
+}
