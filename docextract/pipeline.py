@@ -127,11 +127,18 @@ def extract_document(
     # Stage 4 — totals + validation.
     totals = extractors.extract_totals(text, line_items)
     validated = bool(totals.get("validated"))
+    has_money = any(
+        isinstance(totals.get(key), dict) for key in ("subtotal", "tax", "total")
+    ) or bool(totals.get("computed_line_total"))
+    if validated:
+        totals_message = "Totals validated against line items"
+    elif has_money:
+        totals_message = "Totals not cross-validated (missing or mismatched figures)"
+    else:
+        totals_message = "No monetary totals in this document — nothing to cross-validate"
     tracer.emit(
         "totals",
-        "Totals validated against line items"
-        if validated
-        else "Totals not cross-validated (missing or mismatched figures)",
+        totals_message,
         status="ok" if validated else "info",
         computed_line_total=totals.get("computed_line_total"),
         validated=validated,

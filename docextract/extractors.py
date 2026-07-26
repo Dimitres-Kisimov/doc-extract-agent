@@ -113,11 +113,25 @@ def extract_header_fields(text: str) -> dict[str, dict[str, object]]:
 
 
 def _extract_party(text: str, label_regex: str) -> str | None:
-    """Return the first line following a party label block."""
+    """Return the party named after a label.
+
+    Handles both layouts seen in real documents::
+
+        Bill To:                  Deliver to: Acme GmbH, Musterstrasse 12, ...
+        Acme GmbH
+
+    i.e. the value may be on the following line(s) *or* inline on the same
+    line as the label.
+    """
     lines = text.splitlines()
-    label = re.compile(label_regex + r"\s*:?\s*$", re.I)
+    block_label = re.compile(label_regex + r"\s*:?\s*$", re.I)
+    inline_label = re.compile(label_regex + r"\s*:\s*(\S.*)$", re.I)
     for i, line in enumerate(lines):
-        if label.match(line.strip()):
+        stripped = line.strip()
+        inline = inline_label.match(stripped)
+        if inline:
+            return inline.group(1).strip()
+        if block_label.match(stripped):
             for follow in lines[i + 1:]:
                 if follow.strip():
                     return follow.strip()
@@ -126,9 +140,22 @@ def _extract_party(text: str, label_regex: str) -> str | None:
 
 _HEADINGS = {"INVOICE", "DELIVERY NOTE", "REQUEST FOR QUOTATION", "QUOTATION"}
 
+# Email salutations must never be mistaken for a company name.
+_SALUTATION_RE = re.compile(r"^(dear|hello|hi|good\s+(?:morning|afternoon|evening)|to\s+whom)\b", re.I)
+# Sentence-like letter body text (function words a company name would not contain).
+_PROSE_RE = re.compile(r"\b(we|you|your|our|please|would|kindly|thanks?|regarding|following|request)\b", re.I)
+# The line-items table header — reaching it means the top block held no company name.
+_TABLE_HEADER_RE = re.compile(r"\b(?:description|qty|quantity|unit\s*price|amount)\b", re.I)
+
 
 def _extract_seller(text: str) -> str | None:
-    """Heuristically identify the issuing company (first real line)."""
+    """Heuristically identify the issuing company near the top of the document.
+
+    Skips headings, email headers, salutations ("Dear Sales Team,") and
+    sentence-like prose. Returns ``None`` rather than guessing once the
+    line-items table is reached — an absent counterparty is better than a
+    wrong one.
+    """
     for line in text.splitlines():
         stripped = line.strip()
         if not stripped:
@@ -136,6 +163,14 @@ def _extract_seller(text: str) -> str | None:
         if stripped.upper() in _HEADINGS:
             continue
         if stripped.lower().startswith(("from:", "to:", "subject:", "date:")):
+            continue
+        if _SALUTATION_RE.match(stripped):
+            continue
+        # Reached the table without a plausible company line: give up honestly.
+        if _TABLE_HEADER_RE.search(stripped) or _ROW_RE.match(line):
+            return None
+        # Letter body text is not a company name.
+        if _PROSE_RE.search(stripped) or stripped.endswith("."):
             continue
         return stripped
     return None

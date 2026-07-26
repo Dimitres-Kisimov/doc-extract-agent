@@ -65,6 +65,25 @@ def test_rfq_currency_and_number(rfq: dict) -> None:
     assert rfq["fields"]["document_number"]["value"] == "RFQ-2026-0417"
 
 
+# --- parties (regression: the RFQ salutation must never become the seller) --
+
+def test_rfq_buyer_is_requesting_company(rfq: dict) -> None:
+    # "Deliver to: Acme Industrial GmbH, ..." carries the value inline on the
+    # label line — it must still be picked up as the buyer.
+    assert rfq["fields"]["buyer"]["value"].startswith("Acme Industrial GmbH")
+
+
+def test_rfq_seller_is_not_the_salutation(rfq: dict) -> None:
+    # The email body holds no issuing company name near the top; better to
+    # report no seller than "Dear Sales Team,".
+    assert "seller" not in rfq["fields"]
+
+
+def test_invoice_and_delivery_seller(invoice: dict, delivery: dict) -> None:
+    assert invoice["fields"]["seller"]["value"] == "Example Supplier Handels GmbH"
+    assert delivery["fields"]["seller"]["value"] == "Example Supplier Handels GmbH"
+
+
 # --- line item counts -------------------------------------------------------
 
 @pytest.mark.parametrize("fixture_name", ["rfq", "invoice", "delivery"])
