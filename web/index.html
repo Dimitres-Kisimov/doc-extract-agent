@@ -93,7 +93,12 @@
     .totalsrow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px; }
     .totalsrow .lbl { color: var(--muted); }
     .valid { color: var(--ok); } .invalid { color: var(--warn); }
-    .exports { display: flex; gap: 10px; margin-top: 14px; }
+    .exports { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button.copy {
+      font-family: var(--mono); font-size: 10.5px; padding: 2px 8px;
+      border-radius: 6px; background: transparent; color: var(--muted);
+    }
+    button.copy:hover { color: var(--text); border-color: var(--accent); }
     .muted { color: var(--muted); font-size: 12.5px; }
     .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
     footer { padding: 16px 28px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); }
@@ -104,7 +109,7 @@
   <header>
     <h1>doc-extract-agent</h1>
     <span class="tag">agentic &middot; stdlib-only &middot; offline</span>
-    <p>Paste or drop a business document (RFQ email, invoice, delivery note). An agentic pipeline extracts structured fields with a live trace and per-field confidence.</p>
+    <p>Paste or drop a business document (RFQ email, invoice, delivery note). An agentic pipeline extracts structured fields with a step-by-step trace and per-field confidence.</p>
   </header>
 
   <main>
@@ -121,7 +126,7 @@
         <button class="ghost" id="clear">Clear</button>
         <button class="primary" id="extract">Extract &rarr;</button>
       </div>
-      <textarea id="input" placeholder="Paste a document here, or drop a .txt file&hellip;"></textarea>
+      <textarea id="input" placeholder="Paste a document here, or drop a .txt file&hellip; (Ctrl+Enter extracts)"></textarea>
       <p class="muted" id="status">Ready.</p>
     </section>
 
@@ -138,14 +143,16 @@
         <div class="empty">No result yet.</div>
       </div>
       <div class="exports" id="exports" style="display:none;">
+        <button class="ghost" id="copy-all">Copy all fields</button>
         <button class="ghost" id="dl-json">Download JSON</button>
+        <button class="ghost" id="dl-record">Download full record (CSV)</button>
         <button class="ghost" id="dl-csv">Download line items (CSV)</button>
       </div>
     </section>
   </main>
 
   <footer>
-    Built by <strong>Dimitres Kisimov</strong> &middot; MIT License, 2026 &middot; heuristic mock engine (swap the provider for a real LLM in production).
+    Built by <strong>Dimitres Kisimov</strong> &middot; &copy; 2026, all rights reserved (portfolio review only &mdash; see LICENSE) &middot; heuristic mock engine (swap the provider for a real LLM in production).
   </footer>
 
   <script>
@@ -232,10 +239,24 @@ Goods received in good condition. Please sign and return one copy.`
   let lastResult = null;
 
   $("sample").addEventListener("change", (e) => {
-    if (SAMPLES[e.target.value]) { input.value = SAMPLES[e.target.value]; setStatus("Sample loaded."); }
+    if (!SAMPLES[e.target.value]) return;
+    // Never silently destroy a pasted document: ask before replacing it.
+    const current = input.value;
+    if (current.trim() && !Object.values(SAMPLES).includes(current) &&
+        !confirm("Replace the current document with the sample? Your pasted text will be lost.")) {
+      e.target.value = "";
+      setStatus("Kept your document.");
+      return;
+    }
+    input.value = SAMPLES[e.target.value];
+    setStatus("Sample loaded.");
   });
   $("clear").addEventListener("click", () => { input.value = ""; $("sample").value = ""; setStatus("Cleared."); });
   $("extract").addEventListener("click", runExtract);
+  // Ctrl+Enter (Cmd+Enter on macOS) extracts without leaving the textarea.
+  input.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runExtract(); }
+  });
 
   // Drag & drop a text file onto the textarea.
   ["dragover", "dragenter"].forEach(ev => input.addEventListener(ev, e => { e.preventDefault(); input.classList.add("drag"); }));
@@ -249,13 +270,13 @@ Goods received in good condition. Please sign and return one copy.`
 
   function confClass(c) { return c >= 0.85 ? "high" : c >= 0.6 ? "med" : "low"; }
   function pct(c) { return Math.round(c * 100) + "%"; }
-  function esc(s) { return String(s).replace(/[&<>]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m])); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m])); }
 
   async function runExtract() {
     const text = input.value;
     if (!text.trim()) { setStatus("Nothing to extract — paste a document first."); return; }
     $("extract").disabled = true;
-    setStatus("Running pipeline&hellip;");
+    setStatus("Running pipeline…");
     try {
       const resp = await fetch("/extract", {
         method: "POST",
@@ -275,7 +296,7 @@ Goods received in good condition. Please sign and return one copy.`
     }
   }
 
-  // Reveal trace events one-by-one for a live "agent thinking" feel.
+  // Replay the returned trace events one-by-one (a replay, not a live stream).
   async function animateTrace(events) {
     const box = $("trace");
     box.innerHTML = "";
@@ -308,7 +329,9 @@ Goods received in good condition. Please sign and return one copy.`
       out.push('<div class="kv">');
       for (const [k, f] of Object.entries(fields)) {
         out.push(`<div class="k">${esc(k)}</div><div class="v">${esc(f.value)}</div>` +
-          `<div><span class="badge ${confClass(f.confidence)}">${pct(f.confidence)}</span></div>`);
+          `<div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">` +
+          `<span class="badge ${confClass(f.confidence)}">${pct(f.confidence)}</span>` +
+          `<button class="copy" data-copy="${esc(f.value)}" title="Copy ${esc(k)} to clipboard">copy</button></div>`);
       }
       out.push('</div>');
     } else {
@@ -324,25 +347,30 @@ Goods received in good condition. Please sign and return one copy.`
           <td>${esc(it.description)}</td>
           <td class="num">${esc(fmt(it.quantity))}</td>
           <td>${esc(it.unit ?? "")}</td>
-          <td class="num">${it.unit_price != null ? esc(fmt(it.unit_price)) : "&ndash;"}</td>
-          <td class="num">${it.amount != null ? esc(fmt(it.amount)) : "&ndash;"}</td>
+          <td class="num">${it.unit_price != null ? esc(money(it.unit_price)) : "&ndash;"}</td>
+          <td class="num">${it.amount != null ? esc(money(it.amount)) : "&ndash;"}</td>
           <td><span class="badge ${confClass(it.confidence)}">${pct(it.confidence)}</span></td>
         </tr>`);
       }
       out.push('</tbody></table>');
     }
 
-    // Totals
-    const trows = [];
-    for (const key of ["subtotal", "tax", "total"]) {
-      if (totals[key]) trows.push(`<div class="totalsrow"><span class="lbl">${key}</span><span>${esc(fmt(totals[key].value))} <span class="badge ${confClass(totals[key].confidence)}">${pct(totals[key].confidence)}</span></span></div>`);
-    }
-    if (totals.computed_line_total != null) {
-      trows.push(`<div class="totalsrow"><span class="lbl">computed line total</span><span>${esc(fmt(totals.computed_line_total))}</span></div>`);
-    }
-    if (trows.length) {
+    // Totals — only meaningful when the document carries monetary figures.
+    // An RFQ or delivery note has none; saying "not cross-validated" there
+    // reads like a failure, so state plainly that there is nothing to check.
+    const hasMoney = ["subtotal", "tax", "total"].some(k => totals[k]) || (totals.computed_line_total || 0) > 0;
+    if (hasMoney) {
+      const trows = [];
+      for (const key of ["subtotal", "tax", "total"]) {
+        if (totals[key]) trows.push(`<div class="totalsrow"><span class="lbl">${key}</span><span>${esc(money(totals[key].value))} <span class="badge ${confClass(totals[key].confidence)}">${pct(totals[key].confidence)}</span></span></div>`);
+      }
+      if (totals.computed_line_total != null) {
+        trows.push(`<div class="totalsrow"><span class="lbl">computed line total</span><span>${esc(money(totals.computed_line_total))}</span></div>`);
+      }
       out.push('<div style="max-width:420px;margin-top:14px;">' + trows.join("") +
         `<div class="totalsrow"><span class="lbl">validation</span><span class="${totals.validated ? "valid" : "invalid"}">${totals.validated ? "✓ totals match line items" : "not cross-validated"}</span></div></div>`);
+    } else {
+      out.push('<div class="muted" style="margin-top:14px;">No monetary totals in this document type &mdash; nothing to cross-validate.</div>');
     }
 
     $("result").innerHTML = out.join("");
@@ -354,7 +382,63 @@ Goods received in good condition. Please sign and return one copy.`
     return Number.isInteger(n) ? String(n) : n.toFixed(2);
   }
 
+  // Monetary figures always carry two decimals ("105.00", not "105") so they
+  // re-key into an ERP without ambiguity. Quantities keep fmt() above.
+  function money(n) {
+    return typeof n === "number" ? n.toFixed(2) : n;
+  }
+
+  // --- Copy to clipboard ---
+  // The clerk's next step after every extraction is keying values into an
+  // ERP: one click per field, or one tab-separated block for all of them.
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      // Fallback for contexts without the async clipboard API.
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e2) { ok = false; }
+      ta.remove();
+      return ok;
+    }
+  }
+
+  // Per-field copy buttons are re-rendered with each result: delegate.
+  $("result").addEventListener("click", async (e) => {
+    const btn = e.target.closest("button.copy");
+    if (!btn) return;
+    const ok = await copyText(btn.dataset.copy ?? "");
+    setStatus(ok ? "Copied to clipboard." : "Clipboard unavailable in this browser.");
+  });
+
+  $("copy-all").addEventListener("click", async () => {
+    if (!lastResult) return;
+    const rows = [["doc_type", lastResult.doc_type]];
+    for (const [k, f] of Object.entries(lastResult.fields || {})) rows.push([k, f.value]);
+    const t = lastResult.totals || {};
+    for (const key of ["subtotal", "tax", "total"]) {
+      if (t[key]) rows.push([key, money(t[key].value)]);
+    }
+    // Tab-separated: pastes straight into Excel or an ERP form as two columns.
+    const ok = await copyText(rows.map(r => r.join("\t")).join("\n"));
+    setStatus(ok ? "Copied " + rows.length + " fields to clipboard (tab-separated)." : "Clipboard unavailable in this browser.");
+  });
+
   // --- Exports ---
+  function toCSV(rows) {
+    return rows.map(r => r.map(cell => {
+      const s = String(cell);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(",")).join("\n");
+  }
+
   $("dl-json").addEventListener("click", () => {
     if (!lastResult) return;
     download("extraction.json", JSON.stringify(lastResult, null, 2), "application/json");
@@ -365,11 +449,35 @@ Goods received in good condition. Please sign and return one copy.`
     for (const it of (lastResult.line_items || [])) {
       rows.push([it.position, it.description, it.quantity, it.unit ?? "", it.unit_price ?? "", it.amount ?? "", it.confidence]);
     }
-    const csv = rows.map(r => r.map(cell => {
-      const s = String(cell);
-      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-    }).join(",")).join("\n");
-    download("line_items.csv", csv, "text/csv");
+    download("line_items.csv", toCSV(rows), "text/csv");
+  });
+  // Full record: header fields + totals + line items in one importable table
+  // (header/totals columns repeat on every line-item row).
+  $("dl-record").addEventListener("click", () => {
+    if (!lastResult) return;
+    const f = lastResult.fields || {};
+    const t = lastResult.totals || {};
+    const fieldNames = ["document_number", "document_date", "due_date", "requested_delivery_date",
+      "order_reference", "currency", "buyer", "seller"];
+    const head = ["doc_type", ...fieldNames, "subtotal", "tax", "total", "totals_validated",
+      "position", "description", "quantity", "unit", "unit_price", "amount", "item_confidence"];
+    const base = [lastResult.doc_type,
+      ...fieldNames.map(n => f[n] ? f[n].value : ""),
+      t.subtotal ? money(t.subtotal.value) : "",
+      t.tax ? money(t.tax.value) : "",
+      t.total ? money(t.total.value) : "",
+      t.validated ? "yes" : "no"];
+    const rows = [head];
+    const items = lastResult.line_items || [];
+    if (items.length) {
+      for (const it of items) {
+        rows.push([...base, it.position, it.description, it.quantity, it.unit ?? "",
+          it.unit_price != null ? money(it.unit_price) : "", it.amount != null ? money(it.amount) : "", it.confidence]);
+      }
+    } else {
+      rows.push([...base, "", "", "", "", "", "", ""]);
+    }
+    download("extraction_record.csv", toCSV(rows), "text/csv");
   });
 
   function download(name, content, type) {

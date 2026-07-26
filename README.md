@@ -34,7 +34,7 @@ print(result["totals"]["validated"]) # True
 
 ## What runs when you hit Extract
 
-A five-stage pipeline, and each stage emits a trace event so you can watch it work: `detect` classifies the document, `header` pulls parties/dates/currency/reference numbers, `line_items` parses the table, `totals` extracts the stated totals and cross-checks them against the summed line items, and `confidence` rolls everything into one score. Results export as JSON or CSV.
+A five-stage pipeline, and each stage emits a trace event so you can watch it work: `detect` classifies the document, `header` pulls parties/dates/currency/reference numbers, `line_items` parses the table, `totals` extracts the stated totals and cross-checks them against the summed line items, and `confidence` rolls everything into one score. Results copy to the clipboard (per field, or all fields as a tab-separated block that pastes into Excel/an ERP form) and export as JSON or CSV — line items only, or the full record (header fields + totals + line items) as one importable table. Ctrl+Enter extracts without leaving the textarea.
 
 ## The two bugs that made me write real tests
 
