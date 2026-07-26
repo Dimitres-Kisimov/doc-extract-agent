@@ -37,6 +37,7 @@ _CONTENT_TYPES = {
 }
 
 _MAX_BODY_BYTES = 1_000_000  # 1 MB guard against oversized uploads.
+_MAX_DRAIN_BYTES = 16_000_000  # How much of an oversized body we read before replying 413.
 
 
 class DocExtractHandler(BaseHTTPRequestHandler):
@@ -93,6 +94,19 @@ class DocExtractHandler(BaseHTTPRequestHandler):
 
         length = int(self.headers.get("Content-Length", 0) or 0)
         if length > _MAX_BODY_BYTES:
+            # Drain what the client is still uploading before replying.
+            # Responding 413 mid-upload aborts the TCP connection, so browsers
+            # surface a generic network error ("Failed to fetch") instead of
+            # this JSON message. Reading the body first lets the client see it.
+            remaining = min(length, _MAX_DRAIN_BYTES)
+            while remaining > 0:
+                chunk = self.rfile.read(min(65536, remaining))
+                if not chunk:
+                    break
+                remaining -= len(chunk)
+            if length > _MAX_DRAIN_BYTES:
+                # Truly enormous bodies are not worth reading; close instead.
+                self.close_connection = True
             self._send_json({"error": "document too large"}, status=413)
             return
 
