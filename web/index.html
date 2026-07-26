@@ -99,6 +99,14 @@
       border-radius: 6px; background: transparent; color: var(--muted);
     }
     button.copy:hover { color: var(--text); border-color: var(--accent); }
+    .pill.gate-auto { color: var(--ok); border-color: #1f6b4c; background: #10241c; }
+    .pill.gate-review { color: var(--warn); border-color: #6b5a1f; background: #241f10; }
+    .gatebar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; font-size: 13px; }
+    .gatebar label { color: var(--muted); }
+    .gatebar input {
+      width: 58px; font-family: var(--mono); font-size: 13px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--panel-2); color: var(--text); padding: 6px 8px;
+    }
     .muted { color: var(--muted); font-size: 12.5px; }
     .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
     footer { padding: 16px 28px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); }
@@ -123,10 +131,12 @@
           <option value="invoice">Invoice</option>
           <option value="delivery">Delivery note</option>
         </select>
+        <button class="ghost" id="batch-btn" title="Extract several .txt/.eml files in one go">Batch files&hellip;</button>
+        <input type="file" id="batch-files" multiple accept=".txt,.eml,text/plain" style="display:none;" />
         <button class="ghost" id="clear">Clear</button>
         <button class="primary" id="extract">Extract &rarr;</button>
       </div>
-      <textarea id="input" placeholder="Paste a document here, or drop a .txt file&hellip; (Ctrl+Enter extracts)"></textarea>
+      <textarea id="input" placeholder="Paste a document here, or drop .txt files &mdash; several at once runs a batch&hellip; (Ctrl+Enter extracts)"></textarea>
       <p class="muted" id="status">Ready.</p>
     </section>
 
@@ -136,9 +146,26 @@
       <div class="trace" id="trace"><div class="empty">Run an extraction to see the agentic pipeline execute stage by stage.</div></div>
     </section>
 
+    <!-- Batch results (hidden until a multi-file batch runs) -->
+    <section class="card" id="batch-card" style="grid-column: 1 / -1; display:none;">
+      <h2>Batch results</h2>
+      <p class="muted" id="batch-summary"></p>
+      <div style="overflow-x:auto;"><div id="batch-table"></div></div>
+      <div class="exports">
+        <button class="ghost" id="dl-batch-csv">Download combined records (CSV)</button>
+        <button class="ghost" id="dl-batch-json">Download batch JSON</button>
+        <button class="ghost" id="batch-close">Dismiss batch</button>
+      </div>
+    </section>
+
     <!-- Structured output spans both columns -->
     <section class="card" style="grid-column: 1 / -1;">
       <h2>Structured result</h2>
+      <div class="gatebar">
+        <label for="gate-pct">Auto-post gate</label>
+        <input type="number" id="gate-pct" min="50" max="99" step="1" value="85" />
+        <span class="muted">% &mdash; heuristic rule from the business case: auto-post needs overall confidence at or above the gate <em>and</em> totals that cross-validate against the line items; everything else routes to review.</span>
+      </div>
       <div id="result">
         <div class="empty">No result yet.</div>
       </div>
@@ -237,6 +264,7 @@ Goods received in good condition. Please sign and return one copy.`
   const $ = (id) => document.getElementById(id);
   const input = $("input");
   let lastResult = null;
+  let batchResults = null;
 
   $("sample").addEventListener("change", (e) => {
     if (!SAMPLES[e.target.value]) return;
@@ -258,12 +286,22 @@ Goods received in good condition. Please sign and return one copy.`
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runExtract(); }
   });
 
-  // Drag & drop a text file onto the textarea.
+  // Drag & drop text files onto the textarea: one file loads it for a single
+  // extraction (unchanged), several files run a batch.
   ["dragover", "dragenter"].forEach(ev => input.addEventListener(ev, e => { e.preventDefault(); input.classList.add("drag"); }));
   ["dragleave", "drop"].forEach(ev => input.addEventListener(ev, e => { e.preventDefault(); input.classList.remove("drag"); }));
   input.addEventListener("drop", (e) => {
-    const file = e.dataTransfer.files[0];
+    const files = [...e.dataTransfer.files];
+    if (files.length > 1) { runBatch(files); return; }
+    const file = files[0];
     if (file) { const r = new FileReader(); r.onload = () => { input.value = r.result; setStatus("File loaded: " + file.name); }; r.readAsText(file); }
+  });
+
+  // Batch intake via the file picker (always batch, even for a single file).
+  $("batch-btn").addEventListener("click", () => $("batch-files").click());
+  $("batch-files").addEventListener("change", (e) => {
+    runBatch([...e.target.files]);
+    e.target.value = ""; // allow re-picking the same files
   });
 
   function setStatus(msg) { $("status").textContent = msg; }
@@ -271,6 +309,44 @@ Goods received in good condition. Please sign and return one copy.`
   function confClass(c) { return c >= 0.85 ? "high" : c >= 0.6 ? "med" : "low"; }
   function pct(c) { return Math.round(c * 100) + "%"; }
   function esc(s) { return String(s).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m])); }
+
+  // --- Confidence gate (auto-post vs. review) ---
+  function gateThreshold() {
+    const raw = Number($("gate-pct").value);
+    return (Number.isFinite(raw) ? Math.min(99, Math.max(50, raw)) : 85) / 100;
+  }
+
+  // Mirrors docextract/gate.py evaluate_gate() — keep the two in sync.
+  // Auto-post requires overall >= threshold AND cross-validated totals; the
+  // below-gate flags never change the disposition, they mark what a reviewing
+  // clerk should check first.
+  function evaluateGate(result, threshold) {
+    const totals = result.totals || {};
+    const overall = result.confidence || 0;
+    const validated = !!totals.validated;
+    const hasMoney = ["subtotal", "tax", "total"].some(k => totals[k]) || (totals.computed_line_total || 0) > 0;
+    const fieldsBelow = Object.entries(result.fields || {})
+      .filter(([, f]) => (f.confidence || 0) < threshold).map(([k]) => k).sort();
+    const itemsBelow = (result.line_items || [])
+      .filter(it => (it.confidence || 0) < threshold).map(it => it.position);
+    const reasons = [];
+    if (overall < threshold) reasons.push(`overall confidence ${pct(overall)} is below the ${pct(threshold)} gate`);
+    if (!validated) reasons.push(hasMoney ? "totals did not cross-validate against the line items" : "no monetary totals to cross-validate");
+    const disposition = reasons.length ? "review" : "auto_post";
+    if (!reasons.length) reasons.push(`overall ${pct(overall)} >= gate ${pct(threshold)} and totals cross-validated`);
+    return { threshold, disposition, reasons, fields_below: fieldsBelow, items_below: itemsBelow };
+  }
+
+  // Moving the gate re-evaluates whatever is on screen — no server round trip.
+  $("gate-pct").addEventListener("change", () => {
+    const t = gateThreshold();
+    $("gate-pct").value = Math.round(t * 100); // normalise typed out-of-range values
+    if (lastResult) { lastResult.gate = evaluateGate(lastResult, t); renderResult(lastResult); }
+    if (batchResults) {
+      for (const r of batchResults.results) r.gate = evaluateGate(r, t);
+      renderBatch();
+    }
+  });
 
   async function runExtract() {
     const text = input.value;
@@ -281,7 +357,7 @@ Goods received in good condition. Please sign and return one copy.`
       const resp = await fetch("/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, gate_threshold: gateThreshold() })
       });
       const data = await resp.json();
       if (data.error) { setStatus("Error: " + data.error); return; }
@@ -297,7 +373,8 @@ Goods received in good condition. Please sign and return one copy.`
   }
 
   // Replay the returned trace events one-by-one (a replay, not a live stream).
-  async function animateTrace(events) {
+  // delay 0 renders instantly — used when re-opening a document from a batch.
+  async function animateTrace(events, delay = 160) {
     const box = $("trace");
     box.innerHTML = "";
     for (const ev of events) {
@@ -309,7 +386,7 @@ Goods received in good condition. Please sign and return one copy.`
         `<span class="msg">${esc(ev.message)}</span>`;
       box.appendChild(row);
       box.scrollTop = box.scrollHeight;
-      await new Promise(r => setTimeout(r, 160));
+      if (delay) await new Promise(r => setTimeout(r, delay));
     }
   }
 
@@ -317,19 +394,27 @@ Goods received in good condition. Please sign and return one copy.`
     const fields = data.fields || {};
     const items = data.line_items || [];
     const totals = data.totals || {};
+    // The server stamps the gate; fall back to the mirrored local rule.
+    const gate = data.gate || evaluateGate(data, gateThreshold());
+    const autoPost = gate.disposition === "auto_post";
     const out = [];
 
-    out.push(`<div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+    out.push(`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">
       <span class="pill type-pill">${esc(data.doc_type)}</span>
       <span class="badge ${confClass(data.confidence || 0)}">overall ${pct(data.confidence || 0)}</span>
+      <span class="pill ${autoPost ? "gate-auto" : "gate-review"}">${autoPost ? "auto-post" : "needs review"}</span>
     </div>`);
+    out.push(`<div class="muted" style="margin-bottom:14px;">gate: ${esc(gate.reasons.join("; "))}</div>`);
 
     // Header fields
     if (Object.keys(fields).length) {
       out.push('<div class="kv">');
       for (const [k, f] of Object.entries(fields)) {
+        const flag = gate.fields_below.includes(k)
+          ? `<span class="badge med" title="confidence below the auto-post gate — check this first when reviewing">below gate</span>`
+          : "";
         out.push(`<div class="k">${esc(k)}</div><div class="v">${esc(f.value)}</div>` +
-          `<div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">` +
+          `<div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">` + flag +
           `<span class="badge ${confClass(f.confidence)}">${pct(f.confidence)}</span>` +
           `<button class="copy" data-copy="${esc(f.value)}" title="Copy ${esc(k)} to clipboard">copy</button></div>`);
       }
@@ -349,7 +434,7 @@ Goods received in good condition. Please sign and return one copy.`
           <td>${esc(it.unit ?? "")}</td>
           <td class="num">${it.unit_price != null ? esc(money(it.unit_price)) : "&ndash;"}</td>
           <td class="num">${it.amount != null ? esc(money(it.amount)) : "&ndash;"}</td>
-          <td><span class="badge ${confClass(it.confidence)}">${pct(it.confidence)}</span></td>
+          <td><span class="badge ${confClass(it.confidence)}">${pct(it.confidence)}</span>${gate.items_below.includes(it.position) ? ' <span class="badge med" title="confidence below the auto-post gate">below gate</span>' : ""}</td>
         </tr>`);
       }
       out.push('</tbody></table>');
@@ -452,32 +537,139 @@ Goods received in good condition. Please sign and return one copy.`
     download("line_items.csv", toCSV(rows), "text/csv");
   });
   // Full record: header fields + totals + line items in one importable table
-  // (header/totals columns repeat on every line-item row).
-  $("dl-record").addEventListener("click", () => {
-    if (!lastResult) return;
-    const f = lastResult.fields || {};
-    const t = lastResult.totals || {};
-    const fieldNames = ["document_number", "document_date", "due_date", "requested_delivery_date",
-      "order_reference", "currency", "buyer", "seller"];
-    const head = ["doc_type", ...fieldNames, "subtotal", "tax", "total", "totals_validated",
-      "position", "description", "quantity", "unit", "unit_price", "amount", "item_confidence"];
-    const base = [lastResult.doc_type,
-      ...fieldNames.map(n => f[n] ? f[n].value : ""),
+  // (header/totals columns repeat on every line-item row). The row builder is
+  // shared with the batch export below.
+  const RECORD_FIELDS = ["document_number", "document_date", "due_date", "requested_delivery_date",
+    "order_reference", "currency", "buyer", "seller"];
+  const RECORD_HEAD = ["doc_type", ...RECORD_FIELDS, "subtotal", "tax", "total", "totals_validated",
+    "position", "description", "quantity", "unit", "unit_price", "amount", "item_confidence"];
+
+  function recordRows(result) {
+    const f = result.fields || {};
+    const t = result.totals || {};
+    const base = [result.doc_type,
+      ...RECORD_FIELDS.map(n => f[n] ? f[n].value : ""),
       t.subtotal ? money(t.subtotal.value) : "",
       t.tax ? money(t.tax.value) : "",
       t.total ? money(t.total.value) : "",
       t.validated ? "yes" : "no"];
-    const rows = [head];
-    const items = lastResult.line_items || [];
-    if (items.length) {
-      for (const it of items) {
-        rows.push([...base, it.position, it.description, it.quantity, it.unit ?? "",
-          it.unit_price != null ? money(it.unit_price) : "", it.amount != null ? money(it.amount) : "", it.confidence]);
-      }
-    } else {
-      rows.push([...base, "", "", "", "", "", "", ""]);
+    const items = result.line_items || [];
+    if (!items.length) return [[...base, "", "", "", "", "", "", ""]];
+    return items.map(it => [...base, it.position, it.description, it.quantity, it.unit ?? "",
+      it.unit_price != null ? money(it.unit_price) : "", it.amount != null ? money(it.amount) : "", it.confidence]);
+  }
+
+  $("dl-record").addEventListener("click", () => {
+    if (!lastResult) return;
+    download("extraction_record.csv", toCSV([RECORD_HEAD, ...recordRows(lastResult)]), "text/csv");
+  });
+
+  // --- Batch mode ---
+  // The clerk's real pain is the stack of emailed documents: drop several
+  // .txt/.eml files (or pick them via "Batch files…") and each is extracted
+  // in one request, with a per-document gate disposition and combined exports.
+  // .eml files are read as plain text — there is no MIME/quoted-reply cleanup.
+  function readFileText(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error("could not read " + file.name));
+      r.readAsText(file);
+    });
+  }
+
+  async function runBatch(files) {
+    if (!files.length) return;
+    if (files.length > 50) { setStatus("Batch limited to 50 files at a time."); return; }
+    setStatus("Reading " + files.length + " file(s)…");
+    let documents;
+    try {
+      documents = await Promise.all(files.map(async f => ({ name: f.name, text: await readFileText(f) })));
+    } catch (err) {
+      setStatus("Batch failed: " + err.message);
+      return;
     }
-    download("extraction_record.csv", toCSV(rows), "text/csv");
+    $("extract").disabled = true;
+    setStatus("Extracting " + documents.length + " document(s)…");
+    try {
+      const resp = await fetch("/extract/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documents, gate_threshold: gateThreshold() })
+      });
+      const data = await resp.json();
+      if (data.error) { setStatus("Error: " + data.error); return; }
+      batchResults = data;
+      renderBatch();
+      const s = batchResults.summary;
+      setStatus("Batch done — " + s.auto_post + " auto-post, " + s.review + " for review.");
+    } catch (err) {
+      setStatus("Batch request failed: " + err.message);
+    } finally {
+      $("extract").disabled = false;
+    }
+  }
+
+  function renderBatch() {
+    const results = batchResults.results || [];
+    const auto = results.filter(r => r.gate && r.gate.disposition === "auto_post").length;
+    const t = results.length && results[0].gate ? results[0].gate.threshold : gateThreshold();
+    // Keep the summary in step with client-side re-evaluation (gate control).
+    batchResults.summary = { documents: results.length, auto_post: auto, review: results.length - auto, gate_threshold: t };
+    $("batch-summary").textContent = results.length + " document(s) — " + auto + " auto-post, " +
+      (results.length - auto) + " for review (gate " + pct(t) + "). Open a row to see its full result below.";
+    const out = ['<table><thead><tr><th>#</th><th>File</th><th>Type</th><th>Doc number</th><th>Overall</th><th>Gate</th><th>Items</th><th></th></tr></thead><tbody>'];
+    results.forEach((r, i) => {
+      const g = r.gate || {};
+      const autoPost = g.disposition === "auto_post";
+      const docNo = r.fields && r.fields.document_number ? esc(r.fields.document_number.value) : "&ndash;";
+      out.push(`<tr>
+        <td>${i + 1}</td>
+        <td>${esc(r.name)}</td>
+        <td><span class="pill type-pill">${esc(r.doc_type)}</span></td>
+        <td>${docNo}</td>
+        <td><span class="badge ${confClass(r.confidence || 0)}">${pct(r.confidence || 0)}</span></td>
+        <td><span class="pill ${autoPost ? "gate-auto" : "gate-review"}" title="${esc((g.reasons || []).join("; "))}">${autoPost ? "auto-post" : "review"}</span></td>
+        <td class="num">${(r.line_items || []).length}</td>
+        <td><button class="ghost" data-open="${i}">Open</button></td>
+      </tr>`);
+    });
+    out.push('</tbody></table>');
+    $("batch-table").innerHTML = out.join("");
+    $("batch-card").style.display = "";
+  }
+
+  // Open a batch row in the trace + structured-result panels (instant trace).
+  $("batch-table").addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-open]");
+    if (!btn || !batchResults) return;
+    const r = batchResults.results[Number(btn.dataset.open)];
+    if (!r) return;
+    lastResult = r;
+    await animateTrace(r.trace || [], 0);
+    renderResult(r);
+    setStatus("Opened " + r.name + " — overall confidence " + pct(r.confidence || 0) + ".");
+  });
+
+  $("batch-close").addEventListener("click", () => {
+    batchResults = null;
+    $("batch-card").style.display = "none";
+    setStatus("Batch dismissed.");
+  });
+
+  $("dl-batch-json").addEventListener("click", () => {
+    if (!batchResults) return;
+    download("batch_extraction.json", JSON.stringify(batchResults, null, 2), "application/json");
+  });
+  // Combined full records across every document: same columns as the single
+  // full-record CSV, prefixed with the source file and its gate disposition.
+  $("dl-batch-csv").addEventListener("click", () => {
+    if (!batchResults) return;
+    const rows = [["source", "gate", ...RECORD_HEAD]];
+    for (const r of (batchResults.results || [])) {
+      for (const row of recordRows(r)) rows.push([r.name, r.gate ? r.gate.disposition : "", ...row]);
+    }
+    download("batch_records.csv", toCSV(rows), "text/csv");
   });
 
   function download(name, content, type) {
@@ -488,6 +680,6 @@ Goods received in good condition. Please sign and return one copy.`
     a.click();
     URL.revokeObjectURL(a.href);
   }
-  </script>
+</script>
 </body>
 </html>
