@@ -57,6 +57,59 @@ The parsing looks straightforward until you actually run it against realistic sa
 
 The number parsing has its own share of this — it has to handle both `1.234,56` (EU) and `1,234.56` (US) and decide which separator is the decimal — which is the other place the tests earn their keep.
 
+## Measured extraction quality
+
+Claims like the ones above deserve numbers, so the repo ships a labelled evaluation set — 27 synthetic-but-realistic documents (13 invoices, 8 RFQ emails, 6 delivery notes) with deliberate edge cases: missing and mismatched totals, multi-currency mentions, non-ISO date formats, EU thousands separators, unicode company names, noisy phrasing, partial deliveries. It's generated deterministically (`python -m eval.make_dataset`, fixed seed, committed under `eval/dataset/`) and scored with `python -m eval.run_eval`, which writes `eval/results.json`. This is the measured output on that set:
+
+```
+== doc-extract-agent evaluation (mock pipeline) ==
+Documents: 27 (delivery_note 6, invoice 13, rfq 8)
+
+-- Document type detection --
+correct 27/27 (100.0%)
+
+-- Header fields (exact match) --
+field                      expected  correct  accuracy  spurious
+buyer                            27       26     96.3%         0
+currency                         19       18     94.7%         2
+document_date                    26       24     92.3%         1
+document_number                  27       27    100.0%         0
+due_date                         13       12     92.3%         0
+order_reference                  18       18    100.0%         0
+requested_delivery_date           8        7     87.5%         0
+seller                           19       19    100.0%         0
+
+-- Stated totals (numeric, +/-0.01) --
+total                      expected  correct  accuracy  spurious
+subtotal                         11       11    100.0%         0
+tax                              11       11    100.0%         0
+total                            12       12    100.0%         0
+
+-- Line items (matched by description; qty/unit/price/amount must all match) --
+tp 56  fp 5  fn 6  precision 91.8%  recall 90.3%  f1 91.1%
+
+-- Per document type --
+type              docs  fully correct  field acc  item f1
+delivery_note        6              3      96.5%    96.3%
+invoice             13              9      96.7%    83.9%
+rfq                  8              4      94.6%   100.0%
+all                 27             16
+
+-- Confidence gate @ 0.85 (operating stats) --
+auto-posted:       10 docs, 7 fully correct -> auto-post precision 70.0%
+  posted WITH errors: inv08_weird_dates, inv09_multicurrency, inv10_eu_thousands
+review-flagged:    17 docs, 8 with real extraction errors, 9 extraction-clean (held for unreconciled or absent totals)
+
+lowest threshold with 100% auto-post precision: 0.9393 (auto-post volume drops to 4 of 27 docs)
+```
+
+The honest reading:
+
+- **Only 16 of 27 documents come out fully correct.** Labelled identifiers (document numbers, order references, ISO dates, stated totals) are near-perfect; what fails is exactly what regexes can't see: **non-ISO dates** (`18.07.2026`, `21 July 2026`, `01/09/2026` are all silently dropped), **currency by inference** (an invoice that says "all prices in USD" in prose gets tagged `EUR`; a delivery note with no currency at all gets a spurious `EUR` because a line item is literally named "Pallet EUR 1200x800"), **EU thousands separators in quantities** (`1.000` parses as 1.0), and **prose-polluted columns** ("480 of 500" drops the row).
+- **The gate's auto-post precision at the default 0.85 threshold is 70%, not 100%.** 10 documents auto-post; 3 of them carry real extraction errors. The reason is structural: a field the regex *silently misses* doesn't lower the confidence average (the score only aggregates over what *was* extracted), so a document with a dropped date can score *higher* than a clean one. Confidence catches parse uncertainty, not silent omissions.
+- **What the gate does catch is real:** all 8 documents with broken line items or unreconciled/mismatched totals were held for review — the cross-validation rule (not the confidence score) did that work, including an invoice whose printed totals simply don't add up.
+- **Sweeping the threshold: 0.94 reaches 100% auto-post precision on this set, but volume collapses from 10 to 4 documents.** That trade-off (and the fact that a threshold can't see silent misses at all) is the argument for the roadmap items: per-doc-type required-field checks and per-row qty x price = amount validation would catch these errors structurally instead of statistically.
+
 ## Limitations
 
 - The extraction is a deterministic heuristic (regex plus column-aware table parsing), not a real LLM. That's on purpose — it keeps the demo offline and reproducible — but it's tuned for clean, well-structured documents.
@@ -71,7 +124,7 @@ ruff check .
 pytest -q
 ```
 
-The suite runs the three shipped samples end to end and also feeds the pipeline garbage to check it never crashes.
+The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, and the gate's operating stats are recomputed from the per-document results. Regenerate the numbers any time with `python -m eval.run_eval`.
 
 ## Next
 
