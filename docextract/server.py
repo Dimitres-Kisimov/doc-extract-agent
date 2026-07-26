@@ -1,12 +1,21 @@
 """A tiny stdlib-only web server for the extraction engine.
 
-Serves the interactive UI from ``web/`` and exposes one JSON endpoint:
+Serves the interactive UI from ``web/`` and exposes two JSON endpoints:
 
 ``POST /extract``
-    Request body:  ``{"text": "<document text>"}``
-    Response body: ``{"doc_type", "fields", "line_items", "totals",
-    "confidence", "trace"}`` — exactly what :func:`docextract.extract_document`
-    returns.
+    Request body:  ``{"text": "<document text>", "gate_threshold": 0.85}``
+    (``gate_threshold`` optional). Response body: ``{"doc_type", "fields",
+    "line_items", "totals", "confidence", "gate", "trace"}`` — what
+    :func:`docextract.extract_document` returns, stamped with the
+    auto-post/review disposition from :func:`docextract.evaluate_gate`.
+
+``POST /extract/batch``
+    Request body:  ``{"documents": [{"name": "a.txt", "text": "..."}, ...],
+    "gate_threshold": 0.85}`` (``name`` and ``gate_threshold`` optional; max
+    50 documents, and the whole batch shares the 1 MB request limit).
+    Response body: ``{"results": [...], "summary": {"documents",
+    "auto_post", "review", "gate_threshold"}}`` where each result is the
+    ``/extract`` shape plus the document's ``name``.
 
 Run it with::
 
@@ -24,6 +33,7 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
+from docextract.gate import DEFAULT_THRESHOLD, evaluate_gate
 from docextract.pipeline import extract_document
 
 # Directory holding the static UI (web/index.html), resolved relative to repo root.
@@ -38,6 +48,7 @@ _CONTENT_TYPES = {
 
 _MAX_BODY_BYTES = 1_000_000  # 1 MB guard against oversized uploads.
 _MAX_DRAIN_BYTES = 16_000_000  # How much of an oversized body we read before replying 413.
+_MAX_BATCH_DOCS = 50  # Per-request cap for /extract/batch (the body limit above also applies).
 
 
 class DocExtractHandler(BaseHTTPRequestHandler):
@@ -88,7 +99,8 @@ class DocExtractHandler(BaseHTTPRequestHandler):
         self._send_json({"error": "not found"}, status=404)
 
     def do_POST(self) -> None:  # noqa: N802
-        if urlparse(self.path).path != "/extract":
+        route = urlparse(self.path).path
+        if route not in ("/extract", "/extract/batch"):
             self._send_json({"error": "not found"}, status=404)
             return
 
@@ -117,7 +129,15 @@ class DocExtractHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "invalid JSON body"}, status=400)
             return
 
-        text = data.get("text", "") if isinstance(data, dict) else ""
+        if not isinstance(data, dict):
+            data = {}
+        threshold = data.get("gate_threshold", DEFAULT_THRESHOLD)
+
+        if route == "/extract/batch":
+            self._handle_batch(data, threshold)
+            return
+
+        text = data.get("text", "")
         if not isinstance(text, str):
             self._send_json({"error": "'text' must be a string"}, status=400)
             return
@@ -128,7 +148,59 @@ class DocExtractHandler(BaseHTTPRequestHandler):
         except Exception as exc:  # pragma: no cover - safety net
             self._send_json({"error": f"extraction failed: {exc}"}, status=500)
             return
+        result["gate"] = evaluate_gate(result, threshold)
         self._send_json(result)
+
+    def _handle_batch(self, data: dict[str, object], threshold: object) -> None:
+        """Extract every document in a ``/extract/batch`` request and summarise."""
+        documents = data.get("documents")
+        if not isinstance(documents, list) or not documents:
+            self._send_json({"error": "'documents' must be a non-empty list"}, status=400)
+            return
+        if len(documents) > _MAX_BATCH_DOCS:
+            self._send_json(
+                {"error": f"too many documents (max {_MAX_BATCH_DOCS} per batch)"}, status=400
+            )
+            return
+
+        prepared: list[tuple[str, str]] = []
+        for index, entry in enumerate(documents):
+            if not isinstance(entry, dict) or not isinstance(entry.get("text"), str):
+                self._send_json(
+                    {"error": f"documents[{index}] must be an object with a string 'text'"},
+                    status=400,
+                )
+                return
+            name = entry.get("name")
+            name = name.strip() if isinstance(name, str) and name.strip() else f"document {index + 1}"
+            prepared.append((name, entry["text"]))
+
+        results: list[dict[str, object]] = []
+        auto_post = 0
+        gate_threshold = DEFAULT_THRESHOLD
+        for name, text in prepared:
+            try:
+                result = extract_document(text)
+            except Exception as exc:  # pragma: no cover - safety net
+                self._send_json({"error": f"extraction failed for '{name}': {exc}"}, status=500)
+                return
+            gate = evaluate_gate(result, threshold)
+            gate_threshold = float(gate["threshold"])  # type: ignore[arg-type]
+            if gate["disposition"] == "auto_post":
+                auto_post += 1
+            results.append({"name": name, **result, "gate": gate})
+
+        self._send_json(
+            {
+                "results": results,
+                "summary": {
+                    "documents": len(results),
+                    "auto_post": auto_post,
+                    "review": len(results) - auto_post,
+                    "gate_threshold": gate_threshold,
+                },
+            }
+        )
 
     def log_message(self, format: str, *args: object) -> None:  # noqa: A002
         # Quieter, single-line logging.
