@@ -7,7 +7,7 @@ import json
 import pathlib
 
 from eval.make_dataset import DATASET_DIR, generate
-from eval.run_eval import evaluate, score_document
+from eval.run_eval import FIELD_FAILURE_MODES, evaluate, failure_modes, score_document
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -125,6 +125,66 @@ def test_gate_stats_are_consistent_with_per_document_results() -> None:
     assert sorted(gate["auto_post_misses"]) == sorted(
         d["id"] for d in auto if not d["fully_correct"]
     )
+
+
+def test_failure_modes_partition_the_imperfect_documents() -> None:
+    summary = evaluate()
+    breakdown = summary["failure_modes"]
+    imperfect = {d["id"] for d in summary["documents"] if not d["fully_correct"]}
+    attributed = {
+        doc_id for slot in breakdown["modes"].values() for doc_id in slot["documents"]
+    }
+    # Every imperfect document is attributed to a mode and every attributed
+    # document is genuinely imperfect: the modes cover exactly the failures.
+    assert attributed == imperfect
+    assert set(breakdown["imperfect_ids"]) == imperfect
+    assert breakdown["imperfect_documents"] == len(imperfect)
+    assert breakdown["fully_correct_documents"] + breakdown["imperfect_documents"] == len(
+        summary["documents"]
+    )
+
+
+def test_failure_mode_field_occurrences_reconcile_with_field_accuracy() -> None:
+    summary = evaluate()
+    modes = summary["failure_modes"]["modes"]
+    fields = summary["field_accuracy"]["fields"]
+    field_misses = sum(slot["expected"] - slot["correct"] for slot in fields.values())
+    spurious = sum(slot["spurious"] for slot in fields.values())
+    field_occ = sum(
+        slot["occurrences"] for name, slot in modes.items() if name in FIELD_FAILURE_MODES
+    )
+    # Header-field failure modes account for exactly the field-level misses
+    # plus spurious extractions counted in the accuracy table — nothing lost,
+    # nothing double-counted.
+    assert field_occ == field_misses + spurious
+
+
+def test_measured_failure_mode_headline_on_committed_set() -> None:
+    summary = evaluate()
+    modes = summary["failure_modes"]["modes"]
+    # The honest, measured headline: silent non-ISO date drops are the top mode.
+    assert set(modes["date_not_parsed"]["documents"]) == {
+        "dn04_weird_date", "inv08_weird_dates", "rfq04_weird_date"
+    }
+    assert modes["date_not_parsed"]["occurrences"] == 4
+    # Line-item column misreads hit exactly the two column-format edge cases.
+    assert set(modes["line_item_values_wrong"]["documents"]) == {
+        "inv10_eu_thousands", "inv13_no_amount_column"
+    }
+    # The over-capture symptom is the inline delivery address bleeding into buyer.
+    assert modes["party_over_capture"]["documents"] == ["rfq08_inline_deliver_to"]
+
+
+def test_failure_modes_on_hand_checked_pair() -> None:
+    # A clean pair yields no modes; a broken field is bucketed by symptom.
+    clean = score_document(_hand_truth(), _hand_result())
+    assert failure_modes([clean])["modes"] == {}
+    broken = _hand_result()
+    broken["fields"]["currency"]["value"] = "USD"  # wrong currency value
+    record = score_document(_hand_truth(), broken)
+    modes = failure_modes([record])["modes"]
+    assert "currency_misinferred" in modes
+    assert modes["currency_misinferred"]["documents"] == ["hand01"]
 
 
 def test_threshold_sweep_finding_holds() -> None:

@@ -103,6 +103,23 @@ review-flagged:    17 docs, 8 with real extraction errors, 9 extraction-clean (h
 lowest threshold with 100% auto-post precision: 0.9393 (auto-post volume drops to 4 of 27 docs)
 ```
 
+To make *why* it fails measurable rather than described in prose, the same run groups every imperfect document by symptom — this breakdown is computed by the harness and regenerated with the numbers above:
+
+```
+-- Failure modes (imperfect documents grouped by symptom) --
+mode                     docs  occurrences   documents
+date_not_parsed             3            4   dn04_weird_date, inv08_weird_dates, rfq04_weird_date
+line_item_values_wrong      2            5   inv10_eu_thousands, inv13_no_amount_column
+currency_spurious           2            2   dn03_no_order_ref, rfq06_multicurrency
+currency_misinferred        1            1   inv09_multicurrency
+date_spurious               1            1   rfq03_noisy_no_header_date
+line_item_row_missed        1            1   dn06_partial_delivery
+party_over_capture          1            1   rfq08_inline_deliver_to
+16 of 27 documents fully correct; 11 imperfect across 7 failure modes; most common: date_not_parsed (3 docs)
+```
+
+Every one of the 11 imperfect documents is accounted for by exactly one symptom (the field- and line-item counts reconcile with the accuracy tables above — a test pins this), so the single biggest lever is date parsing: **silent non-ISO date drops account for the most affected documents**, and column-format misreads (`1.000` as a thousands separator, a missing amount column) are the costliest per document.
+
 The honest reading:
 
 - **Only 16 of 27 documents come out fully correct.** Labelled identifiers (document numbers, order references, ISO dates, stated totals) are near-perfect; what fails is exactly what regexes can't see: **non-ISO dates** (`18.07.2026`, `21 July 2026`, `01/09/2026` are all silently dropped), **currency by inference** (an invoice that says "all prices in USD" in prose gets tagged `EUR`; a delivery note with no currency at all gets a spurious `EUR` because a line item is literally named "Pallet EUR 1200x800"), **EU thousands separators in quantities** (`1.000` parses as 1.0), and **prose-polluted columns** ("480 of 500" drops the row).
@@ -124,7 +141,7 @@ ruff check .
 pytest -q
 ```
 
-The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, and the gate's operating stats are recomputed from the per-document results. Regenerate the numbers any time with `python -m eval.run_eval`.
+The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, the gate's operating stats are recomputed from the per-document results, and the failure-mode breakdown is checked to cover exactly the imperfect documents and to reconcile with the per-field accuracy table. Regenerate the numbers any time with `python -m eval.run_eval`.
 
 ## Next
 

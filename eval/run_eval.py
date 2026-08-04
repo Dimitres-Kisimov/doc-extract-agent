@@ -11,7 +11,11 @@ of the documents the gate auto-posts, how many are *fully correct* (the
 number that matters operationally), and of the review-flagged documents,
 how many actually contained extraction errors. Also sweeps the gate
 threshold to find the lowest setting that yields 100% auto-post precision
-on this set.
+on this set, and groups every imperfect document into a **failure-mode
+breakdown** — each mismatch attributed to a named symptom (silent non-ISO
+date drop, currency mis-inference, spurious field, party over-capture,
+line-item column misparse, missed row) with the documents it affects — so
+*why* the heuristic fails is measured, not asserted.
 
 Prints an ASCII report and writes ``eval/results.json``. The run is fully
 deterministic (mock provider, no timestamps in the results file).
@@ -35,6 +39,17 @@ DATASET_DIR = ROOT / "eval" / "dataset"
 RESULTS_PATH = ROOT / "eval" / "results.json"
 MONEY_TOL = 0.01
 STATED_TOTAL_KEYS = ("subtotal", "tax", "total")
+DATE_FIELDS = frozenset({"document_date", "due_date", "requested_delivery_date"})
+PARTY_FIELDS = frozenset({"buyer", "seller"})
+# Modes that describe a header-field defect (as opposed to a line-item one); the
+# breakdown test reconciles their occurrence count against the field-accuracy
+# table (field misses + spurious extractions).
+FIELD_FAILURE_MODES = frozenset({
+    "date_not_parsed", "date_value_wrong", "date_spurious",
+    "currency_misinferred", "currency_not_found", "currency_spurious",
+    "party_over_capture", "party_value_wrong", "party_not_found",
+    "field_not_found", "field_value_wrong", "field_spurious",
+})
 
 
 # ---------------------------------------------------------------------------
@@ -172,6 +187,7 @@ def evaluate(dataset_dir: Path | str = DATASET_DIR) -> dict:
         "by_type": _by_type(docs),
         "gate": _gate_stats(docs),
         "sweep": _sweep(docs),
+        "failure_modes": failure_modes(docs),
         "documents": docs,
     }
 
@@ -283,6 +299,97 @@ def _sweep(docs: list[dict]) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Failure-mode breakdown
+# ---------------------------------------------------------------------------
+
+def _field_failure_mode(name: str, expected: object, extracted: object) -> str:
+    """Name the symptom for one mismatched *header* field.
+
+    Distinguishes a silently dropped value (``extracted is None`` — the regex
+    saw nothing) from a mis-read value, and for party fields separates a name
+    that swallowed the trailing address (over-capture) from an outright wrong
+    value.
+    """
+    if name in DATE_FIELDS:
+        return "date_not_parsed" if extracted is None else "date_value_wrong"
+    if name == "currency":
+        return "currency_not_found" if extracted is None else "currency_misinferred"
+    if name in PARTY_FIELDS:
+        if extracted is None:
+            return "party_not_found"
+        if expected is not None and str(expected).strip() in str(extracted):
+            return "party_over_capture"
+        return "party_value_wrong"
+    return "field_not_found" if extracted is None else "field_value_wrong"
+
+
+def _spurious_field_mode(name: str) -> str:
+    if name == "currency":
+        return "currency_spurious"
+    if name in DATE_FIELDS:
+        return "date_spurious"
+    return "field_spurious"
+
+
+def failure_modes(docs: list[dict]) -> dict:
+    """Attribute every extraction defect to a named failure mode.
+
+    Consumes the per-document score records (nothing is re-extracted) and
+    buckets each mismatched/spurious field, spurious/mismatched total and
+    line-item error into a symptom. ``documents`` lists the affected ids;
+    ``occurrences`` counts individual hits (fields, or — for line items —
+    gold rows not correctly recovered). By construction the union of all
+    ``documents`` equals the set of not-``fully_correct`` documents.
+    """
+    modes: dict[str, dict] = {}
+
+    def hit(mode: str, doc_id: str, occ: int = 1) -> None:
+        slot = modes.setdefault(mode, {"documents": set(), "occurrences": 0})
+        slot["documents"].add(doc_id)
+        slot["occurrences"] += occ
+
+    for doc in docs:
+        doc_id = doc["id"]
+        for name, score in doc["fields"].items():
+            if not score["match"]:
+                hit(_field_failure_mode(name, score["expected"], score["extracted"]), doc_id)
+        for name in doc["spurious_fields"]:
+            hit(_spurious_field_mode(name), doc_id)
+        for score in doc["totals"].values():
+            if not score["match"]:
+                hit("total_value_wrong", doc_id)
+        for _key in doc["spurious_totals"]:
+            hit("total_spurious", doc_id)
+        fp, fn = doc["items"]["fp"], doc["items"]["fn"]
+        if fp and fn:
+            hit("line_item_values_wrong", doc_id, occ=fn)
+        elif fn:
+            hit("line_item_row_missed", doc_id, occ=fn)
+        elif fp:
+            hit("line_item_spurious_row", doc_id, occ=fp)
+
+    resolved = {
+        name: {"documents": sorted(slot["documents"]), "occurrences": slot["occurrences"]}
+        for name, slot in modes.items()
+    }
+    imperfect = sorted(d["id"] for d in docs if not d["fully_correct"])
+    return {
+        "fully_correct_documents": len(docs) - len(imperfect),
+        "imperfect_documents": len(imperfect),
+        "imperfect_ids": imperfect,
+        "modes": dict(sorted(resolved.items())),
+    }
+
+
+def _ranked_modes(breakdown: dict) -> list[tuple[str, dict]]:
+    """Modes ordered by documents affected, then occurrences, then name."""
+    return sorted(
+        breakdown["modes"].items(),
+        key=lambda kv: (-len(kv[1]["documents"]), -kv[1]["occurrences"], kv[0]),
+    )
+
+
+# ---------------------------------------------------------------------------
 # ASCII report
 # ---------------------------------------------------------------------------
 
@@ -356,6 +463,22 @@ def format_report(summary: dict) -> str:
             f"(auto-post volume drops to {best['auto_post']} of {len(docs)} docs)")
     else:
         add("no threshold achieves 100% auto-post precision with non-zero volume on this set")
+    add("")
+
+    breakdown = summary["failure_modes"]
+    ranked = _ranked_modes(breakdown)
+    add("-- Failure modes (imperfect documents grouped by symptom) --")
+    add(f"{'mode':<24}{'docs':>5}{'occurrences':>13}   documents")
+    for name, slot in ranked:
+        add(f"{name:<24}{len(slot['documents']):>5}{slot['occurrences']:>13}   "
+            f"{', '.join(slot['documents'])}")
+    if ranked:
+        top_name, top_slot = ranked[0]
+        add(f"{breakdown['fully_correct_documents']} of {len(docs)} documents fully correct; "
+            f"{breakdown['imperfect_documents']} imperfect across {len(breakdown['modes'])} "
+            f"failure modes; most common: {top_name} ({len(top_slot['documents'])} docs)")
+    else:
+        add(f"all {len(docs)} documents fully correct — no failure modes")
     return "\n".join(lines)
 
 

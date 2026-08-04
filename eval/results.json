@@ -1621,6 +1621,71 @@
     }
   ],
   "documents_scored": 27,
+  "failure_modes": {
+    "fully_correct_documents": 16,
+    "imperfect_documents": 11,
+    "imperfect_ids": [
+      "dn03_no_order_ref",
+      "dn04_weird_date",
+      "dn06_partial_delivery",
+      "inv08_weird_dates",
+      "inv09_multicurrency",
+      "inv10_eu_thousands",
+      "inv13_no_amount_column",
+      "rfq03_noisy_no_header_date",
+      "rfq04_weird_date",
+      "rfq06_multicurrency",
+      "rfq08_inline_deliver_to"
+    ],
+    "modes": {
+      "currency_misinferred": {
+        "documents": [
+          "inv09_multicurrency"
+        ],
+        "occurrences": 1
+      },
+      "currency_spurious": {
+        "documents": [
+          "dn03_no_order_ref",
+          "rfq06_multicurrency"
+        ],
+        "occurrences": 2
+      },
+      "date_not_parsed": {
+        "documents": [
+          "dn04_weird_date",
+          "inv08_weird_dates",
+          "rfq04_weird_date"
+        ],
+        "occurrences": 4
+      },
+      "date_spurious": {
+        "documents": [
+          "rfq03_noisy_no_header_date"
+        ],
+        "occurrences": 1
+      },
+      "line_item_row_missed": {
+        "documents": [
+          "dn06_partial_delivery"
+        ],
+        "occurrences": 1
+      },
+      "line_item_values_wrong": {
+        "documents": [
+          "inv10_eu_thousands",
+          "inv13_no_amount_column"
+        ],
+        "occurrences": 5
+      },
+      "party_over_capture": {
+        "documents": [
+          "rfq08_inline_deliver_to"
+        ],
+        "occurrences": 1
+      }
+    }
+  },
   "field_accuracy": {
     "doc_type": {
       "accuracy": 1.0,
