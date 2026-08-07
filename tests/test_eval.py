@@ -7,7 +7,14 @@ import json
 import pathlib
 
 from eval.make_dataset import DATASET_DIR, generate
-from eval.run_eval import FIELD_FAILURE_MODES, evaluate, failure_modes, score_document
+from eval.run_eval import (
+    FIELD_FAILURE_MODES,
+    calibration,
+    calibration_from_predictions,
+    evaluate,
+    failure_modes,
+    score_document,
+)
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -200,3 +207,118 @@ def test_threshold_sweep_finding_holds() -> None:
     assert all(d["fully_correct"] for d in auto)
     # And the default threshold really is below 100% on this set (the honest bit).
     assert summary["gate"]["auto_post_precision"] < 1.0
+
+
+# --- confidence calibration -------------------------------------------------
+
+def test_calibration_math_on_constructed_predictions() -> None:
+    # A two-prediction set exercises every metric with hand-verifiable numbers:
+    # one correct and one wrong, both stated at 0.9 -> empirical accuracy 0.5.
+    cal = calibration_from_predictions([
+        {"source": "field", "confidence": 0.9, "correct": True},
+        {"source": "field", "confidence": 0.9, "correct": False},
+    ])
+    assert cal["predictions"] == 2
+    assert cal["correct"] == 1
+    assert cal["accuracy"] == 0.5
+    assert cal["mean_confidence"] == 0.9
+    assert cal["calibration_gap"] == 0.4  # over-confident: stated 0.9, real 0.5
+    # Brier = ((0.9-1)^2 + (0.9-0)^2) / 2 = (0.01 + 0.81) / 2
+    assert cal["brier_score"] == 0.41
+    assert cal["ece"] == 0.4  # single bin at 0.9, |0.5 - 0.9| weighted by all
+    assert cal["mce"] == 0.4
+    assert cal["reliability"] == [
+        {"confidence": 0.9, "count": 2, "correct": 1, "accuracy": 0.5, "gap": 0.4}
+    ]
+
+
+def test_calibration_empty_is_safe() -> None:
+    cal = calibration_from_predictions([])
+    assert cal["predictions"] == 0
+    assert cal["accuracy"] is None
+    assert cal["ece"] is None
+    assert cal["reliability"] == []
+    assert cal["by_source"] == {}
+
+
+def test_calibration_reconciles_with_pooled_predictions() -> None:
+    summary = evaluate()
+    docs = summary["documents"]
+    cal = summary["calibration"]
+    pooled = [p for d in docs for p in d["predictions"]]
+    # The aggregate is exactly the pool of every document's scored predictions.
+    assert cal["predictions"] == len(pooled)
+    assert cal["correct"] == sum(int(p["correct"]) for p in pooled)
+    assert calibration(docs) == cal
+    # Metrics stay in their valid ranges.
+    for key in ("accuracy", "mean_confidence", "ece", "mce", "brier_score"):
+        assert 0.0 <= cal[key] <= 1.0
+    # The reliability table partitions the pool: counts and corrects reconcile,
+    # and each row's empirical accuracy is exactly correct/count.
+    assert sum(r["count"] for r in cal["reliability"]) == cal["predictions"]
+    assert sum(r["correct"] for r in cal["reliability"]) == cal["correct"]
+    for row in cal["reliability"]:
+        assert row["accuracy"] == round(row["correct"] / row["count"], 4)
+    # The per-source split also partitions the pool.
+    assert sum(s["predictions"] for s in cal["by_source"].values()) == cal["predictions"]
+    assert sum(s["correct"] for s in cal["by_source"].values()) == cal["correct"]
+
+
+def test_calibration_headline_numbers_on_committed_set() -> None:
+    summary = evaluate()
+    cal = summary["calibration"]
+    # Measured headline: 251 extracted predictions, 96% accurate but only 88.3%
+    # mean stated confidence -> the hand-picked constants are UNDER-confident.
+    assert cal["predictions"] == 251
+    assert cal["correct"] == 241
+    assert cal["accuracy"] == 0.9602
+    assert cal["mean_confidence"] == 0.8835
+    assert cal["calibration_gap"] == -0.0767
+    assert cal["calibration_gap"] < 0  # net under-confident on this set
+    assert cal["ece"] == 0.0878
+    assert cal["mce"] == 0.5
+    assert cal["brier_score"] == 0.0444
+    # The committed results.json deliverable carries the same block.
+    committed = json.loads((ROOT / "eval" / "results.json").read_text(encoding="utf-8"))
+    assert committed["calibration"] == cal
+
+
+def test_calibration_currency_symbol_level_is_the_only_overconfident_bin() -> None:
+    summary = evaluate()
+    reliability = summary["calibration"]["reliability"]
+    over = [row for row in reliability if row["gap"] > 0]
+    # Exactly one stated-confidence level is over-confident: the 0.60 currency
+    # symbol/keyword fallback, empirically right only 25% of the time here.
+    assert len(over) == 1
+    assert over[0]["confidence"] == 0.6
+    assert over[0]["count"] == 4
+    assert over[0]["accuracy"] == 0.25
+    # Every other level is at-or-below its stated confidence (under-confident).
+    others = [row for row in reliability if row["confidence"] != 0.6]
+    assert all(row["gap"] <= 0 for row in others)
+    # The MCE is driven by the 0.50 "unreconciled total" level: those figures
+    # were extracted faithfully (100% correct) but confidence was halved.
+    low = next(row for row in reliability if row["confidence"] == 0.5)
+    assert low["accuracy"] == 1.0
+    assert summary["calibration"]["mce"] == round(abs(low["accuracy"] - low["confidence"]), 4)
+
+
+def test_calibration_cannot_see_silent_omissions() -> None:
+    # The honest limitation, measured: calibration covers only *extracted*
+    # predictions, so extracted-prediction accuracy (96%) is far above the
+    # document-level fully-correct rate (16/27) — because the dominant real
+    # failure, silent non-ISO date drops, emits no confidence at all.
+    summary = evaluate()
+    cal = summary["calibration"]
+    fully_correct_fraction = summary["failure_modes"]["fully_correct_documents"] / len(
+        summary["documents"]
+    )
+    assert cal["accuracy"] > fully_correct_fraction
+    # inv08 drops both non-ISO dates: those labelled fields yield no prediction.
+    inv08 = next(d for d in summary["documents"] if d["id"] == "inv08_weird_dates")
+    silently_missed = [n for n, s in inv08["fields"].items() if s["extracted"] is None]
+    assert silently_missed  # the dropped dates
+    field_preds = [p for p in inv08["predictions"] if p["source"] == "field"]
+    extracted_fields = sum(1 for s in inv08["fields"].values() if s["extracted"] is not None)
+    # One prediction per extracted field, none for the silently missed ones.
+    assert len(field_preds) == extracted_fields

@@ -11,11 +11,14 @@ of the documents the gate auto-posts, how many are *fully correct* (the
 number that matters operationally), and of the review-flagged documents,
 how many actually contained extraction errors. Also sweeps the gate
 threshold to find the lowest setting that yields 100% auto-post precision
-on this set, and groups every imperfect document into a **failure-mode
+on this set, groups every imperfect document into a **failure-mode
 breakdown** — each mismatch attributed to a named symptom (silent non-ISO
 date drop, currency mis-inference, spurious field, party over-capture,
 line-item column misparse, missed row) with the documents it affects — so
-*why* the heuristic fails is measured, not asserted.
+*why* the heuristic fails is measured, not asserted, and runs a **confidence
+calibration** over every extracted prediction (empirical accuracy at each
+stated confidence level, plus ECE, MCE and Brier score) so whether a stated
+0.75 really means 75% is measured rather than assumed.
 
 Prints an ASCII report and writes ``eval/results.json``. The run is fully
 deterministic (mock provider, no timestamps in the results file).
@@ -86,6 +89,11 @@ def score_document(truth: dict, result: dict) -> dict:
     auto-post precision is judged on.
     """
     errors: list[str] = []
+    # Every extracted value that carries a confidence and is scored against a
+    # label becomes a calibration prediction: (confidence, correct). A *silently
+    # missed* field emits no confidence, so it is intentionally absent here —
+    # which is exactly why calibration can never see silent omissions.
+    predictions: list[dict] = []
 
     doc_type_ok = result.get("doc_type") == truth["doc_type"]
     if not doc_type_ok:
@@ -99,10 +107,19 @@ def score_document(truth: dict, result: dict) -> dict:
         got_value = str(got["value"]).strip() if isinstance(got, dict) else None
         match = got_value == str(expected).strip()
         field_scores[name] = {"expected": expected, "extracted": got_value, "match": match}
+        if isinstance(got, dict):
+            predictions.append(
+                {"source": "field", "confidence": float(got.get("confidence") or 0.0), "correct": match}
+            )
         if not match:
             errors.append(f"field {name}: expected {expected!r}, got {got_value!r}")
     spurious_fields = sorted(set(extracted_fields) - set(truth["fields"]))
     for name in spurious_fields:
+        got = extracted_fields.get(name)
+        if isinstance(got, dict):
+            predictions.append(
+                {"source": "field", "confidence": float(got.get("confidence") or 0.0), "correct": False}
+            )
         errors.append(f"field {name}: spurious (not on the document)")
 
     # Stated totals: numeric match within +/-0.01.
@@ -113,6 +130,10 @@ def score_document(truth: dict, result: dict) -> dict:
         got_value = float(got["value"]) if isinstance(got, dict) else None
         match = _num_close(expected, got_value)
         totals_scores[key] = {"expected": expected, "extracted": got_value, "match": match}
+        if isinstance(got, dict):
+            predictions.append(
+                {"source": "total", "confidence": float(got.get("confidence") or 0.0), "correct": match}
+            )
         if not match:
             errors.append(f"total {key}: expected {expected}, got {got_value}")
     spurious_totals = sorted(
@@ -121,6 +142,11 @@ def score_document(truth: dict, result: dict) -> dict:
         if isinstance(extracted_totals.get(key), dict) and key not in truth["totals"]
     )
     for key in spurious_totals:
+        got = extracted_totals.get(key)
+        if isinstance(got, dict):
+            predictions.append(
+                {"source": "total", "confidence": float(got.get("confidence") or 0.0), "correct": False}
+            )
         errors.append(f"total {key}: spurious (not stated on the document)")
 
     # Line items: matched by normalised description key.
@@ -131,12 +157,20 @@ def score_document(truth: dict, result: dict) -> dict:
     for pred in pred_items:
         key = _item_key(str(pred.get("description") or ""))
         gt_item = gt_by_key.get(key)
-        if gt_item is not None and key not in matched_keys and _item_matches(gt_item, pred):
+        item_correct = (
+            gt_item is not None and key not in matched_keys and _item_matches(gt_item, pred)
+        )
+        if item_correct:
             tp += 1
             matched_keys.add(key)
         else:
             fp += 1
             errors.append(f"line item {pred.get('description')!r}: wrong or spurious")
+        conf = pred.get("confidence")
+        if isinstance(conf, (int, float)):
+            predictions.append(
+                {"source": "line_item", "confidence": float(conf), "correct": item_correct}
+            )
     fn = len(gt_by_key) - len(matched_keys)
     for key, gt_item in gt_by_key.items():
         if key not in matched_keys:
@@ -153,6 +187,7 @@ def score_document(truth: dict, result: dict) -> dict:
         "totals": totals_scores,
         "spurious_totals": spurious_totals,
         "items": {"tp": tp, "fp": fp, "fn": fn, "expected": len(gt_by_key)},
+        "predictions": predictions,
         "fully_correct": fully_correct,
         "errors": errors,
     }
@@ -187,6 +222,7 @@ def evaluate(dataset_dir: Path | str = DATASET_DIR) -> dict:
         "by_type": _by_type(docs),
         "gate": _gate_stats(docs),
         "sweep": _sweep(docs),
+        "calibration": calibration(docs),
         "failure_modes": failure_modes(docs),
         "documents": docs,
     }
@@ -296,6 +332,106 @@ def _sweep(docs: list[dict]) -> dict:
         "points": points,
         "min_threshold_for_100pct": best,  # None if unattainable with volume > 0
     }
+
+
+# ---------------------------------------------------------------------------
+# Confidence calibration
+# ---------------------------------------------------------------------------
+
+def _source_calibration(preds: list[dict]) -> dict:
+    """Accuracy / mean-confidence / gap for one prediction source."""
+    count = len(preds)
+    correct = sum(int(p["correct"]) for p in preds)
+    accuracy = correct / count
+    mean_conf = sum(float(p["confidence"]) for p in preds) / count
+    return {
+        "predictions": count,
+        "correct": correct,
+        "accuracy": round(accuracy, 4),
+        "mean_confidence": round(mean_conf, 4),
+        "gap": round(mean_conf - accuracy, 4),
+    }
+
+
+def calibration_from_predictions(preds: list[dict]) -> dict:
+    """Calibrate a flat list of ``{source, confidence, correct}`` predictions.
+
+    Treats each *distinct stated confidence value* as a reliability bin (the
+    heuristic emits a small, fixed set of confidence constants, so the natural
+    support is the honest binning — no arbitrary bin edges). Reports:
+
+    * ``accuracy`` vs ``mean_confidence`` and their signed ``calibration_gap``
+      (positive = the extractor is over-confident on average);
+    * ``brier_score`` — mean squared error of confidence against the 0/1
+      outcome (lower is better);
+    * ``ece`` / ``mce`` — expected and maximum calibration error over the
+      confidence-level bins;
+    * a per-level ``reliability`` table (stated confidence vs. empirical
+      accuracy) and a per-``source`` breakdown (header field / line item /
+      total), so miscalibration can be located.
+
+    Predictions are only the values that were *extracted* with a confidence;
+    silently missed fields carry no confidence and are therefore invisible to
+    calibration — the measured expression of "confidence cannot see silent
+    omissions".
+    """
+    n = len(preds)
+    if n == 0:
+        return {
+            "predictions": 0, "correct": 0, "accuracy": None, "mean_confidence": None,
+            "calibration_gap": None, "brier_score": None, "ece": None, "mce": None,
+            "reliability": [], "by_source": {},
+        }
+
+    correct = sum(int(p["correct"]) for p in preds)
+    accuracy = correct / n
+    mean_conf = sum(float(p["confidence"]) for p in preds) / n
+    brier = sum((float(p["confidence"]) - float(p["correct"])) ** 2 for p in preds) / n
+
+    levels: dict[float, dict] = {}
+    for p in preds:
+        level = round(float(p["confidence"]), 4)
+        slot = levels.setdefault(level, {"count": 0, "correct": 0})
+        slot["count"] += 1
+        slot["correct"] += int(p["correct"])
+
+    reliability: list[dict] = []
+    ece = 0.0
+    mce = 0.0
+    for level in sorted(levels):
+        slot = levels[level]
+        acc = slot["correct"] / slot["count"]
+        error = abs(acc - level)
+        reliability.append({
+            "confidence": level, "count": slot["count"], "correct": slot["correct"],
+            "accuracy": round(acc, 4), "gap": round(level - acc, 4),
+        })
+        ece += (slot["count"] / n) * error
+        mce = max(mce, error)
+
+    by_source = {
+        source: _source_calibration([p for p in preds if p["source"] == source])
+        for source in sorted({p["source"] for p in preds})
+    }
+
+    return {
+        "predictions": n,
+        "correct": correct,
+        "accuracy": round(accuracy, 4),
+        "mean_confidence": round(mean_conf, 4),
+        "calibration_gap": round(mean_conf - accuracy, 4),
+        "brier_score": round(brier, 4),
+        "ece": round(ece, 4),
+        "mce": round(mce, 4),
+        "reliability": reliability,
+        "by_source": by_source,
+    }
+
+
+def calibration(docs: list[dict]) -> dict:
+    """Pool every document's scored predictions and calibrate them."""
+    preds = [p for doc in docs for p in doc.get("predictions", [])]
+    return calibration_from_predictions(preds)
 
 
 # ---------------------------------------------------------------------------
@@ -463,6 +599,27 @@ def format_report(summary: dict) -> str:
             f"(auto-post volume drops to {best['auto_post']} of {len(docs)} docs)")
     else:
         add("no threshold achieves 100% auto-post precision with non-zero volume on this set")
+    add("")
+
+    cal = summary["calibration"]
+    add("-- Confidence calibration (per extracted prediction, correct vs. stated confidence) --")
+    if cal["predictions"]:
+        add(f"predictions {cal['predictions']}  accuracy {_pct(cal['accuracy']).strip()}  "
+            f"mean confidence {_pct(cal['mean_confidence']).strip()}  "
+            f"gap {cal['calibration_gap']:+.4f}")
+        add(f"ECE {cal['ece']:.4f}  MCE {cal['mce']:.4f}  Brier {cal['brier_score']:.4f}  "
+            "(gap>0 = over-confident)")
+        add(f"{'stated conf':>12}{'preds':>7}{'correct':>9}{'empirical':>11}{'gap':>9}")
+        for row in cal["reliability"]:
+            add(f"{row['confidence']:>12.2f}{row['count']:>7}{row['correct']:>9}"
+                f"{_pct(row['accuracy']):>11}{row['gap']:>+9.3f}")
+        add("by source:")
+        for source, slot in cal["by_source"].items():
+            add(f"  {source:<10} preds {slot['predictions']:>3}  "
+                f"accuracy {_pct(slot['accuracy']).strip():>6}  "
+                f"mean conf {_pct(slot['mean_confidence']).strip():>6}  gap {slot['gap']:+.4f}")
+    else:
+        add("no extracted predictions to calibrate")
     add("")
 
     breakdown = summary["failure_modes"]

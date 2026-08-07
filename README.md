@@ -127,6 +127,39 @@ The honest reading:
 - **What the gate does catch is real:** all 8 documents with broken line items or unreconciled/mismatched totals were held for review — the cross-validation rule (not the confidence score) did that work, including an invoice whose printed totals simply don't add up.
 - **Sweeping the threshold: 0.94 reaches 100% auto-post precision on this set, but volume collapses from 10 to 4 documents.** That trade-off (and the fact that a threshold can't see silent misses at all) is the argument for the roadmap items: per-doc-type required-field checks and per-row qty x price = amount validation would catch these errors structurally instead of statistically.
 
+### Is the confidence score honest? (calibration)
+
+The confidence numbers are hand-picked constants (a labelled currency is 0.95, a heuristic seller 0.75, a symbol-inferred currency 0.6, and so on), so the next honest question is whether they *mean* anything: when the extractor says 0.75, is it right about 75% of the time? The same run now measures that directly — it pairs every **extracted** value with whether it was actually correct against the label, then bins by the stated confidence:
+
+```
+-- Confidence calibration (per extracted prediction, correct vs. stated confidence) --
+predictions 251  accuracy 96.0%  mean confidence 88.3%  gap -0.0767
+ECE 0.0878  MCE 0.5000  Brier 0.0444  (gap>0 = over-confident)
+ stated conf  preds  correct  empirical      gap
+        0.50      2        2     100.0%   -0.500
+        0.60      4        1      25.0%   +0.350
+        0.75     19       19     100.0%   -0.250
+        0.80     30       30     100.0%   -0.200
+        0.85     30       26      86.7%   -0.017
+        0.90     55       55     100.0%   -0.100
+        0.93     37       36      97.3%   -0.043
+        0.95     64       62      96.9%   -0.019
+        0.99     10       10     100.0%   -0.010
+by source:
+  field      preds 156  accuracy  96.8%  mean conf  88.4%  gap -0.0839
+  line_item  preds  61  accuracy  91.8%  mean conf  87.1%  gap -0.0467
+  total      preds  34  accuracy 100.0%  mean conf  90.3%  gap -0.0971
+```
+
+The honest reading of the calibration:
+
+- **On average the constants are *under*-confident, not over-confident** (mean confidence 88.3% vs. 96.0% actual accuracy; gap −0.077). The conservative buckets earn it: everything the extractor stated at 0.75 (heuristic seller) or 0.80 (quantity-only line items) was correct on this set. So the constants are pessimistic where the parse is actually reliable.
+- **Exactly one bucket is over-confident, and it is the known-bad one:** the 0.60 currency-by-symbol/keyword fallback is right only **25%** of the time (1 of 4). That is the same currency-mis-inference/spurious failure mode from the breakdown above, now showing up as a calibration defect — the fallback should be trusted far less than 0.60.
+- **The worst single miscalibration (MCE 0.50) is a deliberate one:** the 0.50 "totals did not reconcile" figures were all extracted faithfully (100% match to what is printed), but their confidence is halved on purpose because they failed cross-validation. That 0.50 is a *reconciliation* signal, not an *extraction-correctness* signal — a useful distinction the number alone hides.
+- **Calibration is blind to the biggest real failure.** These 251 points are only the values that were *extracted*; a silently dropped non-ISO date emits no confidence at all, so it never appears here. That is why extracted-prediction accuracy (96.0%) sits so far above the document-level fully-correct rate (16 of 27, 59%): confidence can grade what it attempted, not what it silently skipped — the measured version of the point made two bullets up.
+
+ECE (0.088) and Brier (0.044) summarise this as "close on average, with one genuinely broken bucket"; a test pins the headline numbers and the over-confident-currency finding so they can't drift.
+
 ## Limitations
 
 - The extraction is a deterministic heuristic (regex plus column-aware table parsing), not a real LLM. That's on purpose — it keeps the demo offline and reproducible — but it's tuned for clean, well-structured documents.
@@ -141,11 +174,11 @@ ruff check .
 pytest -q
 ```
 
-The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, the gate's operating stats are recomputed from the per-document results, and the failure-mode breakdown is checked to cover exactly the imperfect documents and to reconcile with the per-field accuracy table. Regenerate the numbers any time with `python -m eval.run_eval`.
+The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, the gate's operating stats are recomputed from the per-document results, the failure-mode breakdown is checked to cover exactly the imperfect documents and to reconcile with the per-field accuracy table, and the confidence calibration is checked both on hand-verifiable arithmetic and on the committed set (the reliability table partitions every extracted prediction, and the over-confident currency-fallback bucket is pinned). Regenerate the numbers any time with `python -m eval.run_eval`.
 
 ## Next
 
-I'd like to run the same documents through the Anthropic provider and diff its output against the heuristic — partly to see where the regex quietly loses, partly to make the confidence scores mean something calibrated rather than hand-picked.
+The calibration above measures how honest the hand-picked confidence constants are; the natural next step is to *act* on it — down-weight the 0.60 currency fallback to match its measured 25%, and run the same documents through the Anthropic provider to diff its output against the heuristic and see where the regex quietly loses. The longer-term fix for the calibration blind spot is structural: per-doc-type required-field checks would turn today's silent, confidence-invisible date drops into an explicit low-confidence signal the gate can see.
 
 ---
 
