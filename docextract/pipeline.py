@@ -7,6 +7,7 @@ Runs the document through ordered stages, each emitting a trace event:
 3. **line_items** — parse the tabular line items.
 4. **totals** — extract and cross-validate totals against the line items.
 5. **confidence** — aggregate a single overall confidence score.
+6. **validate** — run field-level business rules over the extracted record.
 
 The pipeline consults an :mod:`~docextract.llm` provider so it mirrors a real
 agentic design; with the default offline :class:`~docextract.llm.MockProvider`
@@ -27,6 +28,7 @@ import time
 
 from docextract import extractors
 from docextract.llm import LLMProvider, get_provider
+from docextract.validation import validate_document
 
 
 def _clamp(value: float) -> float:
@@ -87,14 +89,16 @@ def extract_document(
 
     if not text.strip():
         tracer.emit("detect", "Empty document — nothing to extract", status="warn")
-        return {
+        empty: dict[str, object] = {
             "doc_type": "unknown",
             "fields": {},
             "line_items": [],
             "totals": {"validated": False, "computed_line_total": 0.0},
             "confidence": 0.0,
-            "trace": tracer.events,
         }
+        empty["validation"] = validate_document(empty, text=text)
+        empty["trace"] = tracer.events
+        return empty
 
     # Stage 1 — detect document type.
     doc_type, type_conf = extractors.detect_doc_type(text)
@@ -153,14 +157,39 @@ def extract_document(
         confidence=overall,
     )
 
-    return {
+    result: dict[str, object] = {
         "doc_type": doc_type,
         "fields": fields,
         "line_items": line_items,
         "totals": totals,
         "confidence": overall,
-        "trace": tracer.events,
     }
+
+    # Stage 6 — field-level business-rule validation over the extracted record.
+    validation = validate_document(result, text=text)
+    if validation["review_recommended"]:
+        failed = ", ".join(
+            sorted({str(c["rule"]) for c in validation["checks"] if c["status"] == "fail"})  # type: ignore[union-attr]
+        )
+        validate_message = f"{validation['errors']} business-rule check(s) failed: {failed}"
+        validate_status = "warn"
+    else:
+        validate_message = (
+            f"All {validation['checks_run']} applicable business-rule check(s) passed"
+        )
+        validate_status = "ok"
+    tracer.emit(
+        "validate",
+        validate_message,
+        status=validate_status,
+        errors=validation["errors"],
+        warnings=validation["warnings"],
+        review_recommended=validation["review_recommended"],
+    )
+
+    result["validation"] = validation
+    result["trace"] = tracer.events
+    return result
 
 
 def _aggregate_confidence(

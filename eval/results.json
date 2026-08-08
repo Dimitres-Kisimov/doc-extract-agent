@@ -206,7 +206,73 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory delivery_note fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 1,
+        "checks_skipped": 7,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8688,
@@ -290,7 +356,66 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory delivery_note fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 1,
+        "checks_skipped": 6,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8313,
@@ -373,7 +498,66 @@
       ],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory delivery_note fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 1,
+        "checks_skipped": 6,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.86,
@@ -454,7 +638,66 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "missing mandatory field(s): document_date",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "fail"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 1,
+        "checks_skipped": 6,
+        "errors": 1,
+        "ok": false,
+        "review_recommended": true,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8611,
@@ -543,7 +786,73 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory delivery_note fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 1,
+        "checks_skipped": 7,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8786,
@@ -624,7 +933,59 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory delivery_note fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 1,
+        "checks_skipped": 5,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9393,
@@ -764,7 +1125,80 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (105.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "105.00 + 19.95 = 124.95",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "500.0 x 0.12 = 60.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "500.0 x 0.05 = 25.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "1000.0 x 0.02 = 20.00",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-17 is on/after document date 2026-07-18",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 7,
+        "checks_skipped": 2,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9393,
@@ -904,7 +1338,80 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (3452.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "3452.00 + 276.16 = 3728.16",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "1250.0 x 2.40 = 3000.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "10000.0 x 0.03 = 300.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "16.0 x 9.50 = 152.00",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-07-30 is on/after document date 2026-06-30",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 7,
+        "checks_skipped": 2,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9369,
@@ -1039,7 +1546,73 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (714.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "714.00 + 135.66 = 849.66",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "120.0 x 3.85 = 462.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "60.0 x 4.20 = 252.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-01 is on/after document date 2026-07-02",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 6,
+        "checks_skipped": 2,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9369,
@@ -1174,7 +1747,73 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (192.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "192.00 + 36.48 = 228.48",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "800.0 x 0.12 = 96.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "40.0 x 2.40 = 96.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-09 is on/after document date 2026-07-10",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 6,
+        "checks_skipped": 2,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.94,
@@ -1289,7 +1928,73 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (96.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "120.0 x 0.55 = 66.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "1000.0 x 0.03 = 30.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-20 is on/after document date 2026-07-21",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "VAT id TOBEACCOUNTED: country not in the format table",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 5,
+        "checks_skipped": 3,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9342,
@@ -1419,7 +2124,66 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (126.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "126.00 + 23.94 = 149.94",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "30.0 x 4.20 = 126.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-04 is on/after document date 2026-07-05",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 5,
+        "checks_skipped": 2,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9413,
@@ -1564,7 +2328,87 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (255.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "255.00 + 48.45 = 303.45",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "200.0 x 0.85 = 170.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "10.0 x 9.50 = 95.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "500.0 x 0.03 = 15.00",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "1.0 x -25.00 = -25.00",
+            "rule": "line_item_math",
+            "scope": "line 4",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-11 is on/after document date 2026-07-12",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 8,
+        "checks_skipped": 2,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9345,
@@ -1692,7 +2536,66 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "missing mandatory field(s): document_date",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "fail"
+          },
+          {
+            "message": "line items sum to the stated total (51.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "51.00 + 9.69 = 60.69",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "300.0 x 0.12 = 36.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "300.0 x 0.05 = 15.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 5,
+        "checks_skipped": 2,
+        "errors": 1,
+        "ok": false,
+        "review_recommended": true,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.91,
@@ -1829,7 +2732,73 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (350.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "350.00 + 24.50 = 374.50",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "100.0 x 2.40 = 240.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "200.0 x 0.55 = 110.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-14 is on/after document date 2026-07-15",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 6,
+        "checks_skipped": 2,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.9369,
@@ -1969,7 +2938,73 @@
           "match": true
         }
       },
-      "totals_validated": true
+      "totals_validated": true,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to the stated total (170.00)",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "170.00 + 32.30 = 202.30",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "1.0 x 0.12 = 0.12, but amount is 120.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "fail"
+          },
+          {
+            "message": "2.5 x 0.02 = 0.05, but amount is 50.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "fail"
+          },
+          {
+            "message": "due_date 2026-08-07 is on/after document date 2026-07-08",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 6,
+        "checks_skipped": 2,
+        "errors": 2,
+        "ok": false,
+        "review_recommended": true,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.913,
@@ -2073,7 +3108,73 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "missing mandatory field(s): monetary_total",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "fail"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "80.0 x 3.85 = 308.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "20.0 x 4.20 = 84.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-18 is on/after document date 2026-07-19",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 4,
+        "checks_skipped": 4,
+        "errors": 1,
+        "ok": false,
+        "review_recommended": true,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8843,
@@ -2213,7 +3314,80 @@
           "match": true
         }
       },
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to 105.00 but do not match the stated total",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "fail"
+          },
+          {
+            "message": "150.00 + 28.50 = 178.50",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "500.0 x 0.12 = 60.00",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "500.0 x 0.05 = 25.00",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "1000.0 x 0.02 = 20.00",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-21 is on/after document date 2026-07-22",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 7,
+        "checks_skipped": 2,
+        "errors": 1,
+        "ok": false,
+        "review_recommended": true,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8629,
@@ -2360,7 +3534,80 @@
           "match": true
         }
       },
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory invoice fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "line items sum to 0.19 but do not match the stated total",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "fail"
+          },
+          {
+            "message": "84.00 + 15.96 = 99.96",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "400.0 x 0.00 = 0.12",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "400.0 x 0.00 = 0.05",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "800.0 x 0.00 = 0.02",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "due_date 2026-08-23 is on/after document date 2026-07-24",
+            "rule": "date_order",
+            "scope": "due_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 7,
+        "checks_skipped": 2,
+        "errors": 1,
+        "ok": false,
+        "review_recommended": true,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8756,
@@ -2449,7 +3696,80 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "requested_delivery_date 2026-08-10 is on/after document date 2026-07-20",
+            "rule": "date_order",
+            "scope": "requested_delivery_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 2,
+        "checks_skipped": 7,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8413,
@@ -2533,7 +3853,73 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "requested_delivery_date 2026-08-12 is on/after document date 2026-07-21",
+            "rule": "date_order",
+            "scope": "requested_delivery_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 2,
+        "checks_skipped": 6,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.885,
@@ -2616,7 +4002,73 @@
       ],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "requested_delivery_date 2026-09-15 is on/after document date 2026-09-15",
+            "rule": "date_order",
+            "scope": "requested_delivery_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 2,
+        "checks_skipped": 6,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8829,
@@ -2697,7 +4149,66 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 1,
+        "checks_skipped": 6,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8757,
@@ -2771,7 +4282,73 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "requested_delivery_date 2026-08-20 is on/after document date 2026-07-23",
+            "rule": "date_order",
+            "scope": "requested_delivery_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 2,
+        "checks_skipped": 6,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8471,
@@ -2849,7 +4426,66 @@
       ],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "requested_delivery_date 2026-08-25 is on/after document date 2026-07-24",
+            "rule": "date_order",
+            "scope": "requested_delivery_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 2,
+        "checks_skipped": 5,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.8756,
@@ -2938,7 +4574,80 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 3",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "requested_delivery_date 2026-08-30 is on/after document date 2026-07-25",
+            "rule": "date_order",
+            "scope": "requested_delivery_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 2,
+        "checks_skipped": 7,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     },
     {
       "confidence": 0.885,
@@ -3024,7 +4733,73 @@
       "spurious_fields": [],
       "spurious_totals": [],
       "totals": {},
-      "totals_validated": false
+      "totals_validated": false,
+      "validation": {
+        "checks": [
+          {
+            "message": "all mandatory rfq fields present",
+            "rule": "required_fields",
+            "scope": "document",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no stated total and line-item sum to reconcile",
+            "rule": "line_total_reconciles",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "need subtotal, tax and total to check the arithmetic",
+            "rule": "totals_arithmetic",
+            "scope": "totals",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 1",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "row lacks quantity, unit price and amount",
+            "rule": "line_item_math",
+            "scope": "line 2",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "requested_delivery_date 2026-09-05 is on/after document date 2026-07-26",
+            "rule": "date_order",
+            "scope": "requested_delivery_date",
+            "severity": "error",
+            "status": "pass"
+          },
+          {
+            "message": "no labelled IBAN found",
+            "rule": "iban_checksum",
+            "scope": "payment",
+            "severity": "error",
+            "status": "skip"
+          },
+          {
+            "message": "no labelled VAT id found",
+            "rule": "vat_format",
+            "scope": "party",
+            "severity": "warning",
+            "status": "skip"
+          }
+        ],
+        "checks_run": 2,
+        "checks_skipped": 6,
+        "errors": 0,
+        "ok": true,
+        "review_recommended": false,
+        "warnings": 0
+      }
     }
   ],
   "documents_scored": 27,
@@ -3343,6 +5118,94 @@
       "correct": 12,
       "expected": 12,
       "spurious": 0
+    }
+  },
+  "validation": {
+    "combined_gate": {
+      "combined_auto_post": 8,
+      "combined_auto_post_fully_correct": 7,
+      "combined_auto_post_precision": 0.875,
+      "gate_auto_post": 10,
+      "gate_auto_post_fully_correct": 7,
+      "gate_auto_post_precision": 0.7,
+      "gate_misses_validation_missed": [
+        "inv09_multicurrency"
+      ],
+      "validation_caught_gate_misses": [
+        "inv08_weird_dates",
+        "inv10_eu_thousands"
+      ]
+    },
+    "documents": 27,
+    "documents_flagged": 6,
+    "documents_ok": 21,
+    "flagged_ids": [
+      "dn04_weird_date",
+      "inv08_weird_dates",
+      "inv10_eu_thousands",
+      "inv11_missing_totals",
+      "inv12_totals_mismatch",
+      "inv13_no_amount_column"
+    ],
+    "rules": {
+      "date_order": {
+        "docs_failed": [],
+        "failed": 0,
+        "passed": 19,
+        "run": 19,
+        "skipped": 0
+      },
+      "iban_checksum": {
+        "docs_failed": [],
+        "failed": 0,
+        "passed": 0,
+        "run": 0,
+        "skipped": 27
+      },
+      "line_item_math": {
+        "docs_failed": [
+          "inv10_eu_thousands"
+        ],
+        "failed": 2,
+        "passed": 29,
+        "run": 31,
+        "skipped": 30
+      },
+      "line_total_reconciles": {
+        "docs_failed": [
+          "inv12_totals_mismatch",
+          "inv13_no_amount_column"
+        ],
+        "failed": 2,
+        "passed": 10,
+        "run": 12,
+        "skipped": 15
+      },
+      "required_fields": {
+        "docs_failed": [
+          "dn04_weird_date",
+          "inv08_weird_dates",
+          "inv11_missing_totals"
+        ],
+        "failed": 3,
+        "passed": 24,
+        "run": 27,
+        "skipped": 0
+      },
+      "totals_arithmetic": {
+        "docs_failed": [],
+        "failed": 0,
+        "passed": 11,
+        "run": 11,
+        "skipped": 16
+      },
+      "vat_format": {
+        "docs_failed": [],
+        "failed": 0,
+        "passed": 0,
+        "run": 0,
+        "skipped": 27
+      }
     }
   }
 }

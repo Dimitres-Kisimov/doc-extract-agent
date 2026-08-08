@@ -458,8 +458,36 @@ Goods received in good condition. Please sign and return one copy.`
       out.push('<div class="muted" style="margin-top:14px;">No monetary totals in this document type &mdash; nothing to cross-validate.</div>');
     }
 
+    // Business-rule validation — the structural second gate (server-computed).
+    if (data.validation) out.push(renderValidation(data.validation));
+
     $("result").innerHTML = out.join("");
     $("exports").style.display = "flex";
+  }
+
+  // Renders the field-level business-rule report from docextract/validation.py.
+  // The engine computes it; the UI only displays the applicable checks.
+  function renderValidation(v) {
+    const glyph = { pass: "&#10003;", fail: "&#10007;", skip: "&ndash;" };
+    const rows = [];
+    for (const c of v.checks || []) {
+      if (c.status === "skip") continue;  // not applicable — hide the noise
+      const color = c.status === "pass" ? "var(--ok)"
+        : (c.severity === "warning" ? "var(--warn)" : "var(--bad)");
+      const tag = c.status === "fail" && c.severity === "warning" ? " (warning)" : "";
+      rows.push(`<div style="display:flex;gap:8px;align-items:baseline;font-size:12.5px;margin:2px 0;">
+        <span style="color:${color};font-family:var(--mono);width:14px;">${glyph[c.status]}</span>
+        <span class="muted" style="min-width:150px;">${esc(c.rule)}${tag}</span>
+        <span style="color:${color === "var(--ok)" ? "var(--muted)" : color};">${esc(c.message)}</span></div>`);
+    }
+    const clean = v.review_recommended
+      ? `<span class="pill gate-review">${v.errors} rule${v.errors === 1 ? "" : "s"} to review</span>`
+      : `<span class="pill gate-auto">all business rules clear</span>`;
+    const skipped = v.checks_skipped ? ` <span class="muted">(${v.checks_skipped} not applicable)</span>` : "";
+    return `<div style="margin-top:18px;">
+      <div style="margin-bottom:8px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;">business rules ${clean}${skipped}</div>
+      ${rows.join("") || '<div class="muted">No applicable business rules for this document.</div>'}
+    </div>`;
   }
 
   function fmt(n) {

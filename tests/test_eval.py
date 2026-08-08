@@ -9,11 +9,13 @@ import pathlib
 from eval.make_dataset import DATASET_DIR, generate
 from eval.run_eval import (
     FIELD_FAILURE_MODES,
+    VALIDATION_RULES,
     calibration,
     calibration_from_predictions,
     evaluate,
     failure_modes,
     score_document,
+    validation_stats,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -322,3 +324,82 @@ def test_calibration_cannot_see_silent_omissions() -> None:
     extracted_fields = sum(1 for s in inv08["fields"].values() if s["extracted"] is not None)
     # One prediction per extracted field, none for the silently missed ones.
     assert len(field_preds) == extracted_fields
+
+
+# --- business-rule validation -----------------------------------------------
+
+def test_validation_stats_are_consistent_with_per_document_reports() -> None:
+    summary = evaluate()
+    docs = summary["documents"]
+    val = summary["validation"]
+    assert validation_stats(docs) == val
+    assert val["documents"] == len(docs)
+    # documents_flagged is exactly the set of review-recommended documents.
+    flagged = sorted(d["id"] for d in docs if d["validation"]["review_recommended"])
+    assert val["flagged_ids"] == flagged
+    assert val["documents_flagged"] == len(flagged)
+    assert val["documents_ok"] + val["documents_flagged"] == len(docs)
+    # Each rule's run/pass/fail/skip tallies reconcile with the raw checks.
+    for rule in VALIDATION_RULES:
+        run = passed = failed = skipped = 0
+        for doc in docs:
+            for check in doc["validation"]["checks"]:
+                if check["rule"] != rule:
+                    continue
+                if check["status"] == "skip":
+                    skipped += 1
+                elif check["status"] == "pass":
+                    run += 1
+                    passed += 1
+                else:
+                    run += 1
+                    failed += 1
+        slot = val["rules"][rule]
+        assert (slot["run"], slot["passed"], slot["failed"], slot["skipped"]) == (
+            run, passed, failed, skipped
+        )
+
+
+def test_validation_measured_headline_on_committed_set() -> None:
+    summary = evaluate()
+    val = summary["validation"]
+    # Measured: 21 of 27 documents clear every business rule, 6 are flagged.
+    assert val["documents_ok"] == 21
+    assert val["documents_flagged"] == 6
+    assert val["flagged_ids"] == [
+        "dn04_weird_date", "inv08_weird_dates", "inv10_eu_thousands",
+        "inv11_missing_totals", "inv12_totals_mismatch", "inv13_no_amount_column",
+    ]
+    # Each structural rule flags exactly the documents it should.
+    rules = val["rules"]
+    assert rules["required_fields"]["docs_failed"] == [
+        "dn04_weird_date", "inv08_weird_dates", "inv11_missing_totals"
+    ]
+    assert rules["line_item_math"]["docs_failed"] == ["inv10_eu_thousands"]
+    assert rules["line_total_reconciles"]["docs_failed"] == [
+        "inv12_totals_mismatch", "inv13_no_amount_column"
+    ]
+    # No synthetic document carries bank details, so these two never run here.
+    assert rules["iban_checksum"]["run"] == 0
+    assert rules["vat_format"]["run"] == 0
+
+
+def test_validation_combined_gate_lifts_auto_post_precision() -> None:
+    summary = evaluate()
+    combined = summary["validation"]["combined_gate"]
+    # The confidence gate alone: 10 auto-posts, 70% precision (3 carry errors).
+    assert combined["gate_auto_post"] == 10
+    assert combined["gate_auto_post_precision"] == 0.7
+    # Requiring the business rules too: 8 auto-posts, 87.5% precision.
+    assert combined["combined_auto_post"] == 8
+    assert combined["combined_auto_post_precision"] == 0.875
+    assert combined["combined_auto_post_precision"] > combined["gate_auto_post_precision"]
+    # It catches the dropped-date and misparsed-quantity errors structurally,
+    # but not the currency mis-inference (a plausible wrong value no rule sees).
+    assert combined["validation_caught_gate_misses"] == [
+        "inv08_weird_dates", "inv10_eu_thousands"
+    ]
+    assert combined["gate_misses_validation_missed"] == ["inv09_multicurrency"]
+    # The committed results.json deliverable carries the same block.
+    committed = json.loads((ROOT / "eval" / "results.json").read_text(encoding="utf-8"))
+    assert committed["validation"] == summary["validation"]

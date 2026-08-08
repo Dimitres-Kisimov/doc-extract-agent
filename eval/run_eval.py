@@ -210,6 +210,7 @@ def evaluate(dataset_dir: Path | str = DATASET_DIR) -> dict:
         record["confidence"] = float(result["confidence"])
         record["totals_validated"] = bool(result["totals"].get("validated"))
         record["disposition"] = gate["disposition"]
+        record["validation"] = result["validation"]
         docs.append(record)
 
     return {
@@ -223,6 +224,7 @@ def evaluate(dataset_dir: Path | str = DATASET_DIR) -> dict:
         "gate": _gate_stats(docs),
         "sweep": _sweep(docs),
         "calibration": calibration(docs),
+        "validation": validation_stats(docs),
         "failure_modes": failure_modes(docs),
         "documents": docs,
     }
@@ -331,6 +333,93 @@ def _sweep(docs: list[dict]) -> dict:
     return {
         "points": points,
         "min_threshold_for_100pct": best,  # None if unattainable with volume > 0
+    }
+
+
+# ---------------------------------------------------------------------------
+# Business-rule validation (the second, structural gate)
+# ---------------------------------------------------------------------------
+
+# Fixed report order so the ASCII table and results.json are deterministic.
+VALIDATION_RULES = (
+    "required_fields",
+    "line_total_reconciles",
+    "totals_arithmetic",
+    "line_item_math",
+    "date_order",
+    "iban_checksum",
+    "vat_format",
+)
+
+
+def validation_stats(docs: list[dict]) -> dict:
+    """Aggregate the per-document business-rule reports across the set.
+
+    Reports, per rule, how often it ran / passed / failed and which documents it
+    flagged; a document-level ``ok`` tally; and — the operationally interesting
+    part — the **combined gate**: what auto-post precision looks like when a
+    document must clear *both* the confidence gate and every error-severity
+    business rule. That combination is what turns the confidence gate's silent
+    misses (a dropped date, a misparsed quantity) into held documents, and the
+    delta between the two precisions is the measured value of the layer. The
+    ``validation`` reports are consumed as-is (nothing is re-extracted).
+    """
+    rule_stats: dict[str, dict] = {
+        rule: {"run": 0, "passed": 0, "failed": 0, "skipped": 0, "docs_failed": []}
+        for rule in VALIDATION_RULES
+    }
+    for doc in docs:
+        seen_failed: set[str] = set()
+        for check in doc["validation"]["checks"]:
+            rule = check["rule"]
+            slot = rule_stats.setdefault(
+                rule, {"run": 0, "passed": 0, "failed": 0, "skipped": 0, "docs_failed": []}
+            )
+            if check["status"] == "skip":
+                slot["skipped"] += 1
+                continue
+            slot["run"] += 1
+            if check["status"] == "pass":
+                slot["passed"] += 1
+            else:
+                slot["failed"] += 1
+                if rule not in seen_failed:
+                    slot["docs_failed"].append(doc["id"])
+                    seen_failed.add(rule)
+    for slot in rule_stats.values():
+        slot["docs_failed"] = sorted(slot["docs_failed"])
+
+    flagged = sorted(d["id"] for d in docs if d["validation"]["review_recommended"])
+    ok_docs = len(docs) - len(flagged)
+
+    # Combined gate: auto-post only when the confidence gate AND validation agree.
+    gate_auto = [d for d in docs if d["disposition"] == "auto_post"]
+    gate_auto_correct = sum(d["fully_correct"] for d in gate_auto)
+    combined_auto = [d for d in gate_auto if d["validation"]["ok"]]
+    combined_correct = sum(d["fully_correct"] for d in combined_auto)
+    # Of the documents the confidence gate auto-posts WITH errors, which did the
+    # validation layer independently catch, and which slipped through anyway?
+    gate_misses = [d for d in gate_auto if not d["fully_correct"]]
+    caught = sorted(d["id"] for d in gate_misses if not d["validation"]["ok"])
+    still_missed = sorted(d["id"] for d in gate_misses if d["validation"]["ok"])
+
+    combined = {
+        "gate_auto_post": len(gate_auto),
+        "gate_auto_post_fully_correct": gate_auto_correct,
+        "gate_auto_post_precision": round(gate_auto_correct / len(gate_auto), 4) if gate_auto else None,
+        "combined_auto_post": len(combined_auto),
+        "combined_auto_post_fully_correct": combined_correct,
+        "combined_auto_post_precision": round(combined_correct / len(combined_auto), 4) if combined_auto else None,
+        "validation_caught_gate_misses": caught,
+        "gate_misses_validation_missed": still_missed,
+    }
+    return {
+        "documents": len(docs),
+        "documents_ok": ok_docs,
+        "documents_flagged": len(flagged),
+        "flagged_ids": flagged,
+        "rules": rule_stats,
+        "combined_gate": combined,
     }
 
 
@@ -586,6 +675,27 @@ def format_report(summary: dict) -> str:
     add(f"review-flagged:   {gate['review']:>3} docs, {gate['review_with_extraction_errors']} "
         f"with real extraction errors, {gate['review_clean_extractions']} extraction-clean "
         "(held for unreconciled or absent totals)")
+    add("")
+
+    val = summary["validation"]
+    combined = val["combined_gate"]
+    add("-- Business-rule validation (structural checks over the extracted record) --")
+    add(f"documents clean {val['documents_ok']}/{val['documents']}, "
+        f"flagged for review {val['documents_flagged']}: {', '.join(val['flagged_ids']) or 'none'}")
+    add(f"{'rule':<24}{'run':>5}{'pass':>6}{'fail':>6}{'skip':>6}   documents flagged")
+    for rule in VALIDATION_RULES:
+        slot = val["rules"][rule]
+        add(f"{rule:<24}{slot['run']:>5}{slot['passed']:>6}{slot['failed']:>6}{slot['skipped']:>6}   "
+            f"{', '.join(slot['docs_failed']) or '-'}")
+    add(f"combined gate (confidence gate AND all business rules): auto-post "
+        f"{combined['gate_auto_post']} -> {combined['combined_auto_post']} docs, "
+        f"precision {_pct(combined['gate_auto_post_precision']).strip()} -> "
+        f"{_pct(combined['combined_auto_post_precision']).strip()}")
+    add(f"  validation caught {len(combined['validation_caught_gate_misses'])} of "
+        f"{len(combined['validation_caught_gate_misses']) + len(combined['gate_misses_validation_missed'])} "
+        f"gate auto-post errors: {', '.join(combined['validation_caught_gate_misses']) or 'none'}"
+        + (f"; still missed: {', '.join(combined['gate_misses_validation_missed'])}"
+           if combined["gate_misses_validation_missed"] else ""))
     add("")
 
     best = summary["sweep"]["min_threshold_for_100pct"]

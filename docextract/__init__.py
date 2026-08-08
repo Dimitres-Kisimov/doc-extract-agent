@@ -23,6 +23,13 @@ Basic usage::
 from docextract.gate import evaluate_gate
 from docextract.llm import MockProvider, get_provider
 from docextract.pipeline import extract_document
+from docextract.validation import validate_document
 
-__all__ = ["extract_document", "evaluate_gate", "MockProvider", "get_provider"]
-__version__ = "1.0.0"
+__all__ = [
+    "extract_document",
+    "evaluate_gate",
+    "validate_document",
+    "MockProvider",
+    "get_provider",
+]
+__version__ = "1.1.0"

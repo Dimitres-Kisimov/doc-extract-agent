@@ -45,9 +45,9 @@ puts early-payment discounts (e.g. 2% / 10 days) at risk, and adds noise to DSO.
 ## Solution
 
 `doc-extract-agent` turns the "unstructured document in, structured record out"
-step into a deterministic pipeline. Five stages run per document — `detect`,
-`header`, `line_items`, `totals`, `confidence` — each emitting a trace event, and
-each field carries its own confidence score. Extraction is **sub-second** and
+step into a deterministic pipeline. Six stages run per document — `detect`,
+`header`, `line_items`, `totals`, `confidence`, `validate` — each emitting a trace
+event, and each field carries its own confidence score. Extraction is **sub-second** and
 runs offline with no API key; the same pipeline can be routed through a real LLM
 provider (`DOCEXTRACT_PROVIDER=anthropic`) without changing the stages, trace, or
 validation logic.
@@ -56,6 +56,17 @@ The load-bearing part for AP is the **totals cross-check**: the engine sums the
 parsed line items and compares that to the stated subtotal/total. When they
 reconcile (within a small tolerance) the matched figure is promoted to 0.99
 confidence and the document is flagged `validated`.
+
+On top of that, a **business-rule validation** layer automates the sanity pass a
+clerk does by eye before posting — per-line `quantity × unit_price = amount`,
+`subtotal + tax = total`, required-field completeness for the document type, date
+order, and IBAN (ISO 13616 mod-97) / VAT format on labelled remittance details.
+It reuses the extracted numbers rather than re-deriving them, and it catches the
+one failure confidence structurally cannot: a *silently dropped* field lowers no
+confidence average, but the required-field rule turns that omission into an
+explicit review signal. Requiring both the confidence gate and the business rules
+lifts modeled auto-post precision from 70% to 87.5% on the labelled set (see the
+repository README for the measured breakdown).
 
 ### Confidence gating (real behaviour, straight-through vs. review)
 
@@ -119,9 +130,14 @@ Numbered workflow:
 5. `totals` extracts the stated totals and cross-checks them against the summed
    lines; a match flips `validated` and promotes that figure to 0.99.
 6. `confidence` rolls everything into one overall score.
-7. **Gate:** score ≥ 0.85 and `validated` → auto-post to ERP; otherwise route to
-   a clerk with every field pre-filled and its confidence shown.
-8. The clerk corrects only the flagged fields; the trace explains each decision.
+7. `validate` runs the field-level business rules over the record (per-line and
+   total arithmetic, required-field completeness, date order, IBAN/VAT format) and
+   recommends review on any hard failure.
+8. **Gate:** the confidence gate (score ≥ 0.85 and `validated`) and the
+   business-rule check together decide the disposition — a document auto-posts
+   only when it clears both; otherwise it routes to a clerk with every field
+   pre-filled and its confidence shown. (The API returns both signals separately.)
+9. The clerk corrects only the flagged fields; the trace explains each decision.
 
 ## Deliverable
 
