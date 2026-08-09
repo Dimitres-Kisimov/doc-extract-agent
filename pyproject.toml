@@ -1,6 +1,6 @@
 [project]
 name = "doc-extract-agent"
-version = "1.0.0"
+version = "1.2.0"
 description = "An interactive, agentic document-intelligence engine (stdlib-only) that extracts structured data from business documents."
 authors = [{ name = "Dimitres Kisimov" }]
 readme = "README.md"

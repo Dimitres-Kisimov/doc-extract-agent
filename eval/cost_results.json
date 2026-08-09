@@ -1,0 +1,286 @@
+{
+  "break_even": {
+    "auto_post_precision_required": 0.984,
+    "measured": {
+      "auto_post_everything": {
+        "auto_post_precision": 0.5926,
+        "max_silent_error_cost": 0.9818,
+        "pays_at_this_precision": false
+      },
+      "gate_only": {
+        "auto_post_precision": 0.7,
+        "max_silent_error_cost": 1.3333,
+        "pays_at_this_precision": false
+      },
+      "gate_plus_validation": {
+        "auto_post_precision": 0.875,
+        "max_silent_error_cost": 3.2,
+        "pays_at_this_precision": false
+      },
+      "strict_gate_100pct": {
+        "auto_post_precision": 1.0,
+        "max_silent_error_cost": null,
+        "pays_at_this_precision": true
+      }
+    },
+    "review_cost_per_doc": 0.4,
+    "silent_error_cost": 25.0
+  },
+  "cheapest_policy": "strict_gate_100pct",
+  "parameters": {
+    "annual_volume": 60000,
+    "labour_rate_per_hour": 32.0,
+    "manual_error_rate": 0.03,
+    "manual_minutes_per_doc": 4.0,
+    "review_seconds_per_doc": 45.0,
+    "silent_error_cost": 25.0
+  },
+  "policies": {
+    "auto_post_everything": {
+      "annual_cost": 611111.11,
+      "annual_review_hours": 0.0,
+      "annual_saving_vs_manual": -438111.11,
+      "annual_silent_errors": 24444.44,
+      "auto_post": 27,
+      "auto_post_errors": 11,
+      "auto_post_precision": 0.5926,
+      "cost_per_doc": 10.1852,
+      "cost_per_doc_review_labour": 0.0,
+      "cost_per_doc_silent_errors": 10.1852,
+      "documents": 27,
+      "review": 0
+    },
+    "gate_only": {
+      "annual_cost": 181777.78,
+      "annual_review_hours": 472.22,
+      "annual_saving_vs_manual": -8777.78,
+      "annual_silent_errors": 6666.67,
+      "auto_post": 10,
+      "auto_post_errors": 3,
+      "auto_post_precision": 0.7,
+      "cost_per_doc": 3.0296,
+      "cost_per_doc_review_labour": 0.2519,
+      "cost_per_doc_silent_errors": 2.7778,
+      "documents": 27,
+      "review": 17
+    },
+    "gate_plus_validation": {
+      "annual_cost": 72444.44,
+      "annual_review_hours": 527.78,
+      "annual_saving_vs_manual": 100555.56,
+      "annual_silent_errors": 2222.22,
+      "auto_post": 8,
+      "auto_post_errors": 1,
+      "auto_post_precision": 0.875,
+      "cost_per_doc": 1.2074,
+      "cost_per_doc_review_labour": 0.2815,
+      "cost_per_doc_silent_errors": 0.9259,
+      "documents": 27,
+      "review": 19
+    },
+    "manual_keying": {
+      "annual_cost": 173000.0,
+      "annual_error_cost": 45000.0,
+      "annual_keying_hours": 4000.0,
+      "annual_labour_cost": 128000.0,
+      "cost_per_doc": 2.8833,
+      "cost_per_doc_keying_errors": 0.75,
+      "cost_per_doc_keying_labour": 2.1333
+    },
+    "review_everything": {
+      "annual_cost": 24000.0,
+      "annual_review_hours": 750.0,
+      "annual_saving_vs_manual": 149000.0,
+      "annual_silent_errors": 0.0,
+      "auto_post": 0,
+      "auto_post_errors": 0,
+      "auto_post_precision": null,
+      "cost_per_doc": 0.4,
+      "cost_per_doc_review_labour": 0.4,
+      "cost_per_doc_silent_errors": 0.0,
+      "documents": 27,
+      "review": 27
+    },
+    "strict_gate_100pct": {
+      "annual_cost": 20444.44,
+      "annual_review_hours": 638.89,
+      "annual_saving_vs_manual": 152555.56,
+      "annual_silent_errors": 0.0,
+      "auto_post": 4,
+      "auto_post_errors": 0,
+      "auto_post_precision": 1.0,
+      "cost_per_doc": 0.3407,
+      "cost_per_doc_review_labour": 0.3407,
+      "cost_per_doc_silent_errors": 0.0,
+      "documents": 27,
+      "review": 23,
+      "threshold": 0.9393
+    }
+  },
+  "source_documents": 27,
+  "sweep_cost_curve": {
+    "cheapest": {
+      "annual_cost": 20444.44,
+      "auto_post": 4,
+      "auto_post_errors": 0,
+      "cost_per_doc": 0.3407,
+      "threshold": 0.9393
+    },
+    "points": [
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8313
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8413
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8471
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.85
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.86
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8611
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8629
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8688
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8756
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8757
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8786
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8829
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.8843
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.885
+      },
+      {
+        "annual_cost": 181777.78,
+        "auto_post": 10,
+        "auto_post_errors": 3,
+        "cost_per_doc": 3.0296,
+        "threshold": 0.91
+      },
+      {
+        "annual_cost": 127111.11,
+        "auto_post": 9,
+        "auto_post_errors": 2,
+        "cost_per_doc": 2.1185,
+        "threshold": 0.913
+      },
+      {
+        "annual_cost": 127111.11,
+        "auto_post": 9,
+        "auto_post_errors": 2,
+        "cost_per_doc": 2.1185,
+        "threshold": 0.9342
+      },
+      {
+        "annual_cost": 128000.0,
+        "auto_post": 8,
+        "auto_post_errors": 2,
+        "cost_per_doc": 2.1333,
+        "threshold": 0.9345
+      },
+      {
+        "annual_cost": 73333.33,
+        "auto_post": 7,
+        "auto_post_errors": 1,
+        "cost_per_doc": 1.2222,
+        "threshold": 0.9369
+      },
+      {
+        "annual_cost": 20444.44,
+        "auto_post": 4,
+        "auto_post_errors": 0,
+        "cost_per_doc": 0.3407,
+        "threshold": 0.9393
+      },
+      {
+        "annual_cost": 22222.22,
+        "auto_post": 2,
+        "auto_post_errors": 0,
+        "cost_per_doc": 0.3704,
+        "threshold": 0.94
+      },
+      {
+        "annual_cost": 23111.11,
+        "auto_post": 1,
+        "auto_post_errors": 0,
+        "cost_per_doc": 0.3852,
+        "threshold": 0.9413
+      }
+    ]
+  }
+}

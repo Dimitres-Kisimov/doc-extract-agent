@@ -32,4 +32,4 @@ __all__ = [
     "MockProvider",
     "get_provider",
 ]
-__version__ = "1.1.0"
+__version__ = "1.2.0"

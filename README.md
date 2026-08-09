@@ -156,6 +156,34 @@ The honest reading:
 - **`iban_checksum` and `vat_format` never fire on this set** — the synthetic documents carry no bank details, so both rules skip all 27. They are exercised instead by unit tests with hand-verified IBAN vectors (a valid `DE…`/`GB…`/`FR…`/`NL…` and a one-digit corruption) and per-country VAT shapes; on a real remittance advice they would run.
 - **The layer checks format and internal consistency, not truth.** The VAT rule verifies the country shape, not that the number is live in VIES; the IBAN rule verifies the ISO 13616 checksum, not that the account exists. It is a pre-post sanity net, informed by the same rules a clerk applies — not a certification.
 
+### What a silent error actually costs: the gate priced in euros
+
+Precision percentages only become decisions when they meet prices, so the repo ships a cost model (`python -m eval.run_cost`) that joins the two things it already has: the **measured** operating point of every gating policy (from `eval/results.json`) and the **modeled** cost parameters the business case documents (€32/h clerk, 4-minute manual keying with 3% errors, €25 per silent error, 45-second pre-filled review = €0.40). Three mechanisms, nothing hidden: a hand-keyed document costs keying labour plus expected keying errors; a reviewed document costs the €0.40 confirm (and is assumed corrected there); an auto-posted document is free when right and €25 when silently wrong. The run prices every policy the harness measured and writes `eval/cost_results.json`:
+
+```
+-- Policies (measured mix priced per document and scaled to annual volume) --
+policy                    auto  errors  review   EUR/doc         EUR/yr      vs manual
+manual_keying                -       -       -    2.8833     173,000.00              -
+auto_post_everything        27      11       0   10.1852     611,111.11    -438,111.11
+gate_only                   10       3      17    3.0296     181,777.78      -8,777.78
+gate_plus_validation         8       1      19    1.2074      72,444.44    +100,555.56
+strict_gate_100pct           4       0      23    0.3407      20,444.44    +152,555.56
+review_everything            0       0      27    0.4000      24,000.00    +149,000.00
+
+-- Break-even: when does skipping the 45-second review pay? --
+auto-posting a document saves the EUR 0.40 review and risks EUR 25.00 per silent error
+-> auto-post pays only above 98.4% precision
+```
+
+The honest reading of the euros:
+
+- **The confidence gate alone would lose money on this set.** €181,778/yr modeled vs. €173,000 manual — 3 silent errors per 27 documents (≈6,667/yr at scale) at €25 each outweigh the 10 skipped 45-second reviews. Automation that silently posts wrong documents is *worse than no automation*, now in a number rather than a sentiment.
+- **The business-rule validation layer is worth ≈ €109,333/yr in this model** — the entire gap between gate-only (€181,778) and gate + validation (€72,444) comes from the two silent errors it structurally catches. This is the euro version of the 70% → 87.5% precision lift.
+- **Auto-posting a document pays only above 98.4% precision** (it saves €0.40 and risks €25: break-even at 1 − 0.40/25). No measured policy clears that bar credibly — gate-only (70%) would need errors to cost under €1.33, gate + validation (87.5%) under €3.20, and the strict 0.94 threshold's "100%" rests on 4 auto-posted documents, far too small a sample to establish 98.4%.
+- **So the model's actual recommendation is the unglamorous one:** extract and pre-fill everything, auto-post almost nothing. The cheapest measured policies are the strict gate (€20,444/yr) and review-everything (€24,000/yr) — meaning nearly all the value is the pre-fill (4 minutes → 45 seconds, €149,000/yr of the saving) and at most a few thousand euros come from skipping confirms. The €110k headline in the business case sits inside the measured-mix range (€100,556/yr with the combined gate, €152,556/yr for the strict gate).
+
+Caveats, in the same spirit as the rest of this README: the euros are **modeled, not measured** — the parameters are the business case's synthetic estimates; the 27-document set deliberately over-represents edge cases, so a real document mix should show higher precision and cheaper policies; reviewed documents are assumed fixed within the 45-second confirm (real rework takes longer); and scaling a 27-document mix to 60,000 documents/yr is an illustration, not a forecast. The arithmetic itself is exact as computed, deterministic, and pinned by tests.
+
 ### Is the confidence score honest? (calibration)
 
 The confidence numbers are hand-picked constants (a labelled currency is 0.95, a heuristic seller 0.75, a symbol-inferred currency 0.6, and so on), so the next honest question is whether they *mean* anything: when the extractor says 0.75, is it right about 75% of the time? The same run now measures that directly — it pairs every **extracted** value with whether it was actually correct against the label, then bins by the stated confidence:
@@ -203,7 +231,7 @@ ruff check .
 pytest -q
 ```
 
-The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, the gate's operating stats are recomputed from the per-document results, the failure-mode breakdown is checked to cover exactly the imperfect documents and to reconcile with the per-field accuracy table, and the confidence calibration is checked both on hand-verifiable arithmetic and on the committed set (the reliability table partitions every extracted prediction, and the over-confident currency-fallback bucket is pinned). The business-rule validation layer has its own suite — each rule's pass/fail/skip path on hand-built records, the ISO 13616 IBAN vectors, the VAT-id-vs-tax-line disambiguation, the warning-doesn't-force-review split, a collapses-to-base-case check (a clean invoice passes every rule) and the measured combined-gate precision lift (70% → 87.5%) pinned against the committed results. Regenerate the numbers any time with `python -m eval.run_eval`.
+The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, the gate's operating stats are recomputed from the per-document results, the failure-mode breakdown is checked to cover exactly the imperfect documents and to reconcile with the per-field accuracy table, and the confidence calibration is checked both on hand-verifiable arithmetic and on the committed set (the reliability table partitions every extracted prediction, and the over-confident currency-fallback bucket is pinned). The business-rule validation layer has its own suite — each rule's pass/fail/skip path on hand-built records, the ISO 13616 IBAN vectors, the VAT-id-vs-tax-line disambiguation, the warning-doesn't-force-review split, a collapses-to-base-case check (a clean invoice passes every rule) and the measured combined-gate precision lift (70% → 87.5%) pinned against the committed results. The cost model has its own suite too: the business-case anchors recomputed by hand (€0.40 review, €2.8833/doc and €173,000/yr manual baseline), each policy's per-document cost checked against its exact fraction, break-even consistency (at exactly the break-even precision the expected error cost equals the review cost saved), collapse-to-base-case checks (free errors leave only review labour; a review priced at the full keying time reproduces the manual baseline), input validation, determinism, and the committed `eval/cost_results.json` verified byte-for-byte against regeneration. Regenerate the numbers any time with `python -m eval.run_eval` followed by `python -m eval.run_cost`.
 
 ## Next
 

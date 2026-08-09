@@ -114,6 +114,18 @@ straight-through, the rest get a pre-filled ~45-second review):
 Faster posting also shortens invoice-to-post latency and protects early-payment
 discounts — upside noted but deliberately left out of the headline number.
 
+**Measured check on these assumptions:** the repository now prices the
+*measured* gate behaviour directly — `python -m eval.run_cost` joins this
+table's cost parameters with the labelled-set operating points (see the
+README's "gate priced in euros" section). It is less optimistic than the 60%
+straight-through assumption above: at the measured 37% auto-post share and 70%
+precision, the confidence gate alone would cost *more* than manual keying
+(€181.8k vs. €173k/yr, modeled), the business-rule layer turns that into a
+€100.6k/yr saving, and the model's break-even shows auto-posting a document
+pays only above 98.4% precision. The measured-mix argument, in euros, for the
+conservative default this business case recommends: pre-fill everything, and
+earn the right to auto-post with precision, not with a threshold.
+
 ## Stakeholders & use case
 
 - **AP / order-desk clerks** — stop retyping; confirm the pre-filled tail.
