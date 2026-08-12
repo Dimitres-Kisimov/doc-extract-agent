@@ -4,7 +4,7 @@ Picture a three-person AP & order-desk team keying ~60,000 supplier invoices, or
 
 Paste a business document — an RFQ email, an invoice, a delivery note — and get structured data back: header fields, line items, and totals that are cross-checked against the line items, each with a confidence score, a layer of field-level business-rule checks (per-line and total arithmetic, required-field completeness, IBAN/VAT format), and a step-by-step trace of how it got there.
 
-![doc-extract-agent web UI — document input with sample loader, pipeline trace panel and structured-result area (landing state)](docs/img/ui.png)
+![doc-extract-agent web UI — inspection-bench layout: the document on the left with the pipeline-trace timeline beneath it; findings on the right with the stamped auto-post verdict, the cost-model economics beside it, and per-field confidence meters (invoice sample, light theme)](docs/img/ui.png)
 
 This is the "unstructured document in, structured record out" loop that sits under a lot of Data & AI automation work, and I built it while learning that space for internship applications. It complements a sibling project, `agentic-automation-lab`. Everything runs on Python's standard library — no dependencies, no API key, no build step.
 

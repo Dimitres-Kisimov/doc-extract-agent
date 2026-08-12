@@ -3,129 +3,467 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Crect%20x='1.5'%20y='1.5'%20width='13'%20height='13'%20rx='3'%20fill='none'%20stroke='%232a78d6'%20stroke-width='2'/%3E%3Cpath%20d='M4.5%208.5l2.5%202.5%204.5-5'%20fill='none'%20stroke='%232a78d6'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E" />
   <title>doc-extract-agent</title>
   <style>
+    /* =====================================================================
+       Inspection bench — design tokens.
+       The document is the specimen on the left; the findings sheet is on the
+       right; verdicts are stamped; the economics ride beside the verdict.
+       Both themes are designed (not derived): a warm paper bench by day, a
+       charcoal bench by night. Every text token clears WCAG AA 4.5:1 on its
+       surface and every mark/control clears 3:1 — verified per token pair.
+       ===================================================================== */
     :root {
-      --bg: #0f1420;
-      --panel: #171e2e;
-      --panel-2: #1e2740;
-      --border: #2a3550;
-      --text: #e7ecf5;
-      --muted: #93a0bd;
-      --accent: #5b9dff;
-      --accent-2: #7c5cff;
-      --ok: #34c98a;
-      --warn: #f0b347;
-      --bad: #ff6b6b;
-      --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      color-scheme: light;
+      /* bench surfaces */
+      --page: #f3f2ec;
+      --surface: #fcfcfb;
+      --well: #f6f5f0;
+      --hairline: #e3e2db;
+      --rule: #c6c5bc;
+      --ctrl-border: #8f8d84;
+      /* ink */
+      --ink: #171613;
+      --ink-2: #52514e;
+      --muted: #67655e;
+      /* accent — interactive + the high-confidence meter ramp */
+      --accent: #2a78d6;
+      --accent-ink: #1c5cab;
+      --accent-track: #cde2fb;
+      --btn-bg: #1c5cab;
+      --btn-bg-hover: #174e92;
+      --btn-ink: #ffffff;
+      /* status — always paired with a glyph + label, never color alone */
+      --ok: #0ca30c;    --ok-ink: #006300;   --ok-track: #d3ecd3;  --ok-wash: #eef6ee;
+      --warn: #a36b00;  --warn-ink: #7a5300; --warn-track: #f3e2c0; --warn-wash: #f9f2e2;
+      --bad: #d03b3b;   --bad-ink: #b8322c;  --bad-track: #f6d6d6;  --bad-wash: #fbeeee;
+      --focus: #1c5cab;
+      --shadow: 0 1px 2px rgba(23, 22, 19, .05), 0 4px 14px rgba(23, 22, 19, .05);
+      --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
       --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --page: #111110;
+        --surface: #1a1a19;
+        --well: #151514;
+        --hairline: #2c2c2a;
+        --rule: #3a3a37;
+        --ctrl-border: #6b6a63;
+        --ink: #f2f1ec;
+        --ink-2: #c3c2b7;
+        --muted: #98968f;
+        --accent: #3987e5;
+        --accent-ink: #6da7ec;
+        --accent-track: #223a58;
+        --btn-bg: #6da7ec;
+        --btn-bg-hover: #82b4ef;
+        --btn-ink: #10233c;
+        --ok: #0ca30c;    --ok-ink: #3dbb3d;   --ok-track: #1d3a1d;  --ok-wash: #182518;
+        --warn: #eda100;  --warn-ink: #fab219; --warn-track: #423413; --warn-wash: #262013;
+        --bad: #e66767;   --bad-ink: #e66767;  --bad-track: #46201f; --bad-wash: #291717;
+        --focus: #6da7ec;
+        --shadow: none;
+      }
+    }
+
     * { box-sizing: border-box; }
     body {
-      margin: 0; background: var(--bg); color: var(--text);
-      font-family: var(--sans); line-height: 1.5;
+      margin: 0; background: var(--page); color: var(--ink);
+      font-family: var(--sans); font-size: 14px; line-height: 1.5;
     }
+    :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    ::selection { background: var(--accent-track); }
+    a { color: var(--accent-ink); }
+    .muted { color: var(--muted); font-size: 12.5px; }
+
+    /* --- masthead --------------------------------------------------------- */
     header {
-      padding: 22px 28px; border-bottom: 1px solid var(--border);
-      background: linear-gradient(120deg, #141b2c, #10182a);
-      display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+      padding: 16px 28px 14px; background: var(--surface);
+      border-bottom: 3px double var(--rule);
     }
-    header h1 { margin: 0; font-size: 20px; letter-spacing: .3px; }
-    header .tag {
-      font-family: var(--mono); font-size: 12px; color: var(--muted);
-      background: var(--panel-2); padding: 3px 9px; border-radius: 20px;
-      border: 1px solid var(--border);
+    .mast { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    header h1 {
+      margin: 0 6px 0 0; font-family: var(--mono); font-size: 15px;
+      font-weight: 700; letter-spacing: .02em;
     }
-    header p { margin: 0; color: var(--muted); font-size: 13px; width: 100%; }
+    .chip {
+      font-family: var(--mono); font-size: 10.5px; color: var(--ink-2);
+      border: 1px solid var(--hairline); background: var(--well);
+      padding: 2px 9px; border-radius: 999px; letter-spacing: .03em;
+    }
+    header p { margin: 6px 0 0; color: var(--muted); font-size: 13px; max-width: 88ch; }
+
+    /* --- bench grid ------------------------------------------------------- */
     main {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
-      padding: 22px 28px; max-width: 1500px; margin: 0 auto;
+      display: grid; gap: 20px; padding: 22px 28px; max-width: 1480px; margin: 0 auto;
+      grid-template-columns: minmax(360px, 5fr) minmax(0, 7fr);
+      /* the 1fr middle row absorbs the tall findings column, so the trace
+         card hugs the document card instead of drifting down */
+      grid-template-rows: min-content minmax(0, 1fr) min-content;
+      grid-template-areas: "doc findings" "trace findings" "batch batch";
+      align-items: start;
     }
-    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    #doc-card { grid-area: doc; }
+    #trace-card { grid-area: trace; }
+    #findings-card { grid-area: findings; }
+    #batch-card { grid-area: batch; }
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-areas: "doc" "findings" "trace" "batch";
+        padding: 18px 16px;
+      }
+    }
+
     .card {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 12px; padding: 16px 18px;
+      background: var(--surface); border: 1px solid var(--hairline);
+      border-radius: 6px; padding: 16px 18px 18px; box-shadow: var(--shadow);
     }
     .card h2 {
-      margin: 0 0 12px; font-size: 13px; text-transform: uppercase;
-      letter-spacing: 1px; color: var(--muted); font-weight: 600;
+      display: flex; align-items: center; gap: 10px; margin: 0 0 14px;
+      font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+      color: var(--muted); font-weight: 700;
     }
-    .controls { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    .card h2::after { content: ""; flex: 1; border-top: 1px solid var(--hairline); }
+    .card-note { margin: -8px 0 10px; color: var(--muted); font-size: 12px; }
+
+    /* Designed empty state — a quiet dashed plate, not a bare sentence. */
+    .plate {
+      border: 1px dashed var(--rule); border-radius: 4px;
+      color: var(--muted); font-size: 13px; padding: 16px 14px;
+    }
+
+    /* --- document card ---------------------------------------------------- */
+    .controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
     select, button {
-      font-family: var(--sans); font-size: 14px; border-radius: 8px;
-      border: 1px solid var(--border); background: var(--panel-2);
-      color: var(--text); padding: 9px 12px; cursor: pointer;
+      font-family: var(--sans); font-size: 13px; border-radius: 4px;
+      border: 1px solid var(--ctrl-border); background: var(--surface);
+      color: var(--ink); padding: 7px 12px; cursor: pointer;
     }
+    button:hover, select:hover { border-color: var(--accent-ink); color: var(--accent-ink); }
     button.primary {
-      background: linear-gradient(120deg, var(--accent), var(--accent-2));
-      border: none; color: #fff; font-weight: 600; padding: 9px 20px;
+      background: var(--btn-bg); border-color: var(--btn-bg);
+      color: var(--btn-ink); font-weight: 650; padding: 7px 18px; margin-left: auto;
     }
-    button.primary:disabled { opacity: .5; cursor: default; }
-    button.ghost { background: transparent; }
+    button.primary:hover { background: var(--btn-bg-hover); border-color: var(--btn-bg-hover); color: var(--btn-ink); }
+    button.primary:disabled { opacity: .55; cursor: default; }
     textarea {
-      width: 100%; height: 340px; resize: vertical; background: #0d1220;
-      color: var(--text); border: 1px solid var(--border); border-radius: 8px;
-      padding: 12px; font-family: var(--mono); font-size: 12.5px; line-height: 1.5;
+      width: 100%; min-height: 320px; resize: vertical;
+      background: var(--well); color: var(--ink);
+      border: 1px solid var(--ctrl-border); border-radius: 4px;
+      padding: 12px 14px; font-family: var(--mono); font-size: 12.5px; line-height: 1.55;
     }
-    textarea.drag { border-color: var(--accent); }
-    .trace { max-height: 210px; overflow-y: auto; font-family: var(--mono); font-size: 12.5px; }
-    .trace .ev { display: flex; gap: 10px; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px; background: var(--panel-2); }
-    .trace .step { color: var(--muted); min-width: 22px; }
-    .trace .stg { color: var(--accent); min-width: 88px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: none; }
-    .dot.ok { background: var(--ok); } .dot.info { background: var(--accent); } .dot.warn { background: var(--warn); }
-    .kv { display: grid; grid-template-columns: 160px 1fr auto; gap: 6px 12px; align-items: center; font-size: 13.5px; }
-    .kv .k { color: var(--muted); font-family: var(--mono); font-size: 12px; }
-    .kv .v { word-break: break-word; }
-    .badge {
-      font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 20px;
-      border: 1px solid var(--border); white-space: nowrap;
+    textarea.drag { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-track); }
+    .status { margin: 10px 0 0; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+    /* --- trace: the bench log, a quiet timeline --------------------------- */
+    .trace { max-height: 300px; overflow-y: auto; }
+    .timeline { list-style: none; margin: 0; padding: 2px 0 2px 2px; position: relative; }
+    .timeline::before {
+      content: ""; position: absolute; left: 6px; top: 10px; bottom: 10px;
+      width: 1px; background: var(--hairline);
     }
-    .badge.high { color: var(--ok); border-color: #1f6b4c; background: #10241c; }
-    .badge.med { color: var(--warn); border-color: #6b5a1f; background: #241f10; }
-    .badge.low { color: var(--bad); border-color: #6b1f1f; background: #241010; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
-    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); }
-    th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
-    td.num { text-align: right; font-family: var(--mono); }
-    .pill { display: inline-block; font-family: var(--mono); font-size: 12px; padding: 3px 10px; border-radius: 20px; background: var(--panel-2); border: 1px solid var(--border); }
-    .type-pill { text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
-    .totalsrow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px; }
-    .totalsrow .lbl { color: var(--muted); }
-    .valid { color: var(--ok); } .invalid { color: var(--warn); }
-    .exports { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
-    button.copy {
-      font-family: var(--mono); font-size: 10.5px; padding: 2px 8px;
-      border-radius: 6px; background: transparent; color: var(--muted);
+    .tl {
+      position: relative; display: grid; grid-template-columns: 92px minmax(0, 1fr);
+      gap: 2px 10px; padding: 4px 0 4px 24px; font-size: 12.5px;
     }
-    button.copy:hover { color: var(--text); border-color: var(--accent); }
-    .pill.gate-auto { color: var(--ok); border-color: #1f6b4c; background: #10241c; }
-    .pill.gate-review { color: var(--warn); border-color: #6b5a1f; background: #241f10; }
-    .gatebar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; font-size: 13px; }
-    .gatebar label { color: var(--muted); }
+    .tl-node {
+      position: absolute; left: 2px; top: 9px; width: 9px; height: 9px;
+      border-radius: 50%; background: var(--ok);
+      box-shadow: 0 0 0 2px var(--surface); /* surface ring keeps nodes clear of the rail */
+    }
+    .tl--info .tl-node { background: transparent; border: 2px solid var(--accent); }
+    .tl--warn .tl-node { border-radius: 2px; transform: rotate(45deg); background: var(--warn); }
+    .tl-stage {
+      font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--ink-2); font-weight: 600; padding-top: 2px;
+    }
+    .tl-msg { color: var(--ink-2); overflow-wrap: anywhere; }
+    .tl--warn .tl-msg { color: var(--warn-ink); }
+    @media (max-width: 560px) { .tl { grid-template-columns: 1fr; } }
+
+    /* --- gate control ----------------------------------------------------- */
+    .gatebar {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline);
+      font-size: 12.5px;
+    }
+    .gatebar label { color: var(--ink-2); font-weight: 600; }
     .gatebar input {
-      width: 58px; font-family: var(--mono); font-size: 13px; border-radius: 8px;
-      border: 1px solid var(--border); background: var(--panel-2); color: var(--text); padding: 6px 8px;
+      width: 62px; font-family: var(--mono); font-size: 13px; text-align: right;
+      border-radius: 4px; border: 1px solid var(--ctrl-border);
+      background: var(--surface); color: var(--ink); padding: 5px 8px;
     }
-    .muted { color: var(--muted); font-size: 12.5px; }
-    .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
-    footer { padding: 16px 28px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); }
-    a { color: var(--accent); }
+    .gatebar .unit { color: var(--muted); }
+    .gatebar-note { flex-basis: 100%; color: var(--muted); font-size: 12px; }
+
+    /* --- findings head: specimen plate + overall meter --------------------- */
+    .fhead { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .plate-type {
+      font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--accent-ink);
+      border: 1px solid currentColor; padding: 3px 9px; border-radius: 3px; white-space: nowrap;
+    }
+    .fhead-overall { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .fhead-lbl {
+      font-size: 11px; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--muted); font-weight: 700;
+    }
+
+    /* --- confidence meters -------------------------------------------------
+       The designed unit for every per-field confidence: a filled track whose
+       fill carries severity (accent / warning / danger), an unfilled track in
+       a lighter step of the same ramp, a tick at the auto-post gate, and the
+       numeric value beside it — the number and tick carry the meaning, the
+       color only restates it. */
+    .meter { display: inline-flex; align-items: center; gap: 7px; }
+    .meter-track { position: relative; width: 64px; height: 6px; border-radius: 3px; flex: none; }
+    .meter--wide .meter-track { width: 180px; height: 7px; }
+    .meter--sm .meter-track { width: 48px; }
+    .meter-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 3px; }
+    .meter-tick {
+      position: absolute; top: -2px; bottom: -2px; width: 2px;
+      background: var(--ink-2); opacity: .75; border-radius: 1px;
+    }
+    .meter--high .meter-track { background: var(--accent-track); }
+    .meter--high .meter-fill { background: var(--accent); }
+    .meter--med .meter-track { background: var(--warn-track); }
+    .meter--med .meter-fill { background: var(--warn); }
+    .meter--low .meter-track { background: var(--bad-track); }
+    .meter--low .meter-fill { background: var(--bad); }
+    .meter-num {
+      font-family: var(--mono); font-size: 11.5px; font-variant-numeric: tabular-nums;
+      color: var(--ink-2); min-width: 32px;
+    }
+
+    /* "check this first" flag — dashed form + text, never color alone */
+    .flag {
+      font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+      color: var(--warn-ink); border: 1px dashed var(--warn); border-radius: 3px;
+      padding: 1px 5px; white-space: nowrap;
+    }
+
+    /* --- verdict banner + economics ---------------------------------------- */
+    .verdict {
+      display: grid; grid-template-columns: max-content minmax(0, 1fr) 290px;
+      gap: 18px; align-items: start; margin-top: 14px; padding: 16px;
+      border: 1px solid var(--hairline); border-radius: 6px;
+    }
+    .verdict--auto { background: var(--ok-wash); border-left: 3px solid var(--ok); }
+    .verdict--review { background: var(--warn-wash); border-left: 3px solid var(--warn); }
+    .verdict-stamp { align-self: center; padding: 4px 6px 4px 2px; }
+
+    /* The stamp — the one deliberate typographic risk on this bench. */
+    .stamp {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+      font-size: 14px; line-height: 1; padding: 10px 14px;
+      border: 2px solid currentColor; border-radius: 5px;
+      outline: 1px solid currentColor; outline-offset: 2px;
+      transform: rotate(-2deg);
+      animation: stamp-in .28s cubic-bezier(.2, .9, .3, 1.35) both;
+    }
+    .stamp-glyph { font-size: 13px; }
+    .stamp--auto { color: var(--ok-ink); }
+    .stamp--review { color: var(--warn-ink); }
+    @keyframes stamp-in {
+      0% { transform: rotate(-2deg) scale(1.45); opacity: 0; }
+      65% { transform: rotate(-2deg) scale(.97); opacity: 1; }
+      100% { transform: rotate(-2deg) scale(1); opacity: 1; }
+    }
+
+    .verdict-kicker {
+      font-size: 10px; text-transform: uppercase; letter-spacing: .12em;
+      color: var(--muted); font-weight: 700; margin-bottom: 4px;
+    }
+    .verdict-reasons { margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink-2); }
+    .verdict-reasons li { padding-left: 16px; position: relative; }
+    .verdict-reasons li::before { content: "\2014"; position: absolute; left: 0; color: var(--muted); }
+    .verdict-check { margin-top: 8px; font-size: 12px; color: var(--muted); }
+    .verdict-check code {
+      font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+      background: var(--surface); border: 1px solid var(--hairline);
+      border-radius: 3px; padding: 1px 5px; margin-left: 2px;
+      display: inline-block; white-space: nowrap;
+    }
+
+    /* Economics — the committed cost-model figures, a priced ledger strip. */
+    .economics { border-left: 1px solid var(--rule); padding-left: 16px; font-size: 12px; }
+    .econ-head {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+      font-size: 10px; text-transform: uppercase; letter-spacing: .12em;
+      color: var(--muted); font-weight: 700;
+    }
+    .econ-tag {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0; text-transform: none;
+      font-weight: 400; color: var(--ink-2); border: 1px dashed var(--ctrl-border);
+      border-radius: 999px; padding: 1px 7px;
+    }
+    .econ-rows { margin: 0; display: grid; gap: 3px; }
+    .econ-rows > div { display: flex; justify-content: space-between; gap: 10px; }
+    .econ-rows dt { color: var(--muted); }
+    .econ-rows dd {
+      margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink);
+    }
+    .econ-rows .unit { color: var(--muted); font-size: 10px; margin-left: 1px; }
+    .econ-meter { display: block; margin-top: 12px; }
+    .econ-track {
+      display: block; position: relative; height: 6px; border-radius: 3px;
+      background: var(--accent-track);
+    }
+    .econ-fill {
+      position: absolute; top: 0; bottom: 0; left: 0;
+      border-radius: 3px 0 0 3px; background: var(--accent);
+    }
+    .econ-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
+    .econ-scale {
+      display: flex; justify-content: space-between; gap: 8px; margin-top: 4px;
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+    }
+    .econ-note { margin: 10px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+    @media (max-width: 1240px) {
+      .verdict { grid-template-columns: max-content minmax(0, 1fr); }
+      .economics {
+        grid-column: 1 / -1; border-left: none; border-top: 1px solid var(--rule);
+        padding: 12px 0 0;
+      }
+    }
+    @media (max-width: 560px) { .verdict { grid-template-columns: 1fr; } }
+
+    /* --- section rules ----------------------------------------------------- */
+    .sect {
+      display: flex; align-items: center; gap: 10px; margin: 22px 0 10px;
+      font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+      color: var(--muted); font-weight: 700;
+    }
+    .sect::after { content: ""; flex: 1; border-top: 1px solid var(--hairline); }
+    .sect-note {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0;
+      text-transform: none; font-weight: 400; color: var(--muted);
+    }
+
+    /* --- fields: the ledger ------------------------------------------------ */
+    .ledger { margin-top: 2px; }
+    .frow { display: flex; gap: 10px; align-items: center; padding: 5px 0; }
+    .frow + .frow { border-top: 1px solid var(--hairline); }
+    .fkey { font-family: var(--mono); font-size: 12px; color: var(--muted); flex: none; }
+    .fleader {
+      flex: 1 1 12px; min-width: 12px; height: 1px; align-self: center;
+      border-bottom: 1px dotted var(--rule); margin-top: 8px;
+    }
+    .fval { text-align: right; overflow-wrap: anywhere; font-size: 13.5px; max-width: 46ch; }
+    .fmeta { display: flex; gap: 8px; align-items: center; flex: none; }
+    button.copy {
+      font-family: var(--mono); font-size: 10.5px; padding: 2px 7px;
+      border: 1px solid transparent; border-radius: 3px;
+      background: transparent; color: var(--muted);
+    }
+    button.copy:hover { color: var(--accent-ink); border-color: var(--ctrl-border); }
+    @media (max-width: 560px) {
+      .frow { flex-wrap: wrap; }
+      .fval { text-align: left; }
+      .fleader { display: none; }
+      .fmeta { margin-left: auto; }
+    }
+
+    /* --- tables ------------------------------------------------------------ */
+    .scroll-x { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); font-weight: 700; text-align: left;
+      padding: 6px 8px; border-bottom: 1px solid var(--rule);
+    }
+    td { padding: 7px 8px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+    th.num, td.num {
+      text-align: right; font-family: var(--mono); font-size: 12.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    .conf-cell { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+
+    /* --- totals: accounting ruling ----------------------------------------- */
+    .totals { max-width: 400px; margin: 4px 0 0 auto; }
+    .trow {
+      display: flex; justify-content: space-between; gap: 16px;
+      padding: 5px 0; font-size: 13.5px;
+    }
+    .trow + .trow { border-top: 1px solid var(--hairline); }
+    .trow .lbl { color: var(--muted); }
+    .trow .amt {
+      font-family: var(--mono); font-variant-numeric: tabular-nums;
+      display: flex; gap: 8px; align-items: center;
+    }
+    .trow.trow--grand {
+      border-top: 1px solid var(--rule);
+      border-bottom: 3px double var(--rule); font-weight: 650;
+    }
+    .trow--grand .lbl { color: var(--ink-2); }
+
+    /* --- rule stamps: pass / fail / warning as designed objects -------------
+       Form + glyph + label carry the verdict; color restates it.
+       pass: solid ring + check | fail: heavy ring + cross | warn: dashed + bang */
+    .rstamp {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+    }
+    .rstamp--pass { color: var(--ok-ink); border: 1px solid var(--ok); background: var(--ok-wash); }
+    .rstamp--fail { color: var(--bad-ink); border: 2px solid var(--bad); background: var(--bad-wash); }
+    .rstamp--warn { color: var(--warn-ink); border: 1px dashed var(--warn); background: var(--warn-wash); }
+    .rules { list-style: none; margin: 0; padding: 0; }
+    .rulerow {
+      display: grid; grid-template-columns: 76px 158px 96px minmax(0, 1fr);
+      gap: 10px; align-items: baseline; padding: 5px 0; font-size: 12.5px;
+    }
+    .rulerow + .rulerow { border-top: 1px solid var(--hairline); }
+    .rname { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+    .rscope { font-family: var(--mono); font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+    .rmsg { color: var(--ink-2); overflow-wrap: anywhere; }
+    .rulerow--pass .rmsg { color: var(--muted); }
+    .rulerow--fail .rmsg { color: var(--bad-ink); }
+    .rulerow--warn .rmsg { color: var(--warn-ink); }
+    @media (max-width: 720px) {
+      .rulerow { grid-template-columns: 76px minmax(0, 1fr); }
+      .rscope { display: none; }
+      .rmsg { grid-column: 1 / -1; }
+    }
+
+    /* --- exports & batch ---------------------------------------------------- */
+    .exports { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+    footer {
+      padding: 16px 28px; color: var(--muted); font-size: 12px;
+      border-top: 3px double var(--rule); background: var(--surface); margin-top: 8px;
+    }
+
+    /* Reduced motion: no stamp thunk, no scrolling animation surprises. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>doc-extract-agent</h1>
-    <span class="tag">agentic &middot; stdlib-only &middot; offline</span>
+    <div class="mast">
+      <h1>doc-extract-agent</h1>
+      <span class="chip">agentic</span>
+      <span class="chip">stdlib-only</span>
+      <span class="chip">offline</span>
+    </div>
     <p>Paste or drop a business document (RFQ email, invoice, delivery note). An agentic pipeline extracts structured fields with a step-by-step trace and per-field confidence.</p>
   </header>
 
   <main>
-    <!-- LEFT: input -->
-    <section class="card">
+    <!-- LEFT: the specimen -->
+    <section class="card" id="doc-card">
       <h2>Document</h2>
       <div class="controls">
-        <select id="sample">
+        <select id="sample" aria-label="Load a sample document">
           <option value="">Load a sample&hellip;</option>
           <option value="rfq">RFQ email</option>
           <option value="invoice">Invoice</option>
@@ -136,44 +474,46 @@
         <button class="ghost" id="clear">Clear</button>
         <button class="primary" id="extract">Extract &rarr;</button>
       </div>
-      <textarea id="input" placeholder="Paste a document here, or drop .txt files &mdash; several at once runs a batch&hellip; (Ctrl+Enter extracts)"></textarea>
-      <p class="muted" id="status">Ready.</p>
+      <textarea id="input" aria-label="Document text" placeholder="Paste a document here, or drop .txt files &mdash; several at once runs a batch&hellip; (Ctrl+Enter extracts)"></textarea>
+      <p class="status" id="status" aria-live="polite">Ready.</p>
     </section>
 
-    <!-- RIGHT: pipeline trace -->
-    <section class="card">
+    <!-- LEFT, below: the bench log -->
+    <section class="card" id="trace-card">
       <h2>Pipeline trace</h2>
-      <div class="trace" id="trace"><div class="empty">Run an extraction to see the agentic pipeline execute stage by stage.</div></div>
+      <p class="card-note">Each run&rsquo;s stage events, replayed after completion &mdash; not a live stream.</p>
+      <div class="trace" id="trace"><div class="plate">Run an extraction to see the agentic pipeline execute stage by stage.</div></div>
     </section>
 
-    <!-- Batch results (hidden until a multi-file batch runs) -->
-    <section class="card" id="batch-card" style="grid-column: 1 / -1; display:none;">
-      <h2>Batch results</h2>
-      <p class="muted" id="batch-summary"></p>
-      <div style="overflow-x:auto;"><div id="batch-table"></div></div>
-      <div class="exports">
-        <button class="ghost" id="dl-batch-csv">Download combined records (CSV)</button>
-        <button class="ghost" id="dl-batch-json">Download batch JSON</button>
-        <button class="ghost" id="batch-close">Dismiss batch</button>
-      </div>
-    </section>
-
-    <!-- Structured output spans both columns -->
-    <section class="card" style="grid-column: 1 / -1;">
-      <h2>Structured result</h2>
+    <!-- RIGHT: the findings sheet -->
+    <section class="card" id="findings-card">
+      <h2>Findings</h2>
       <div class="gatebar">
         <label for="gate-pct">Auto-post gate</label>
         <input type="number" id="gate-pct" min="50" max="99" step="1" value="85" />
-        <span class="muted">% &mdash; heuristic rule from the business case: auto-post needs overall confidence at or above the gate <em>and</em> totals that cross-validate against the line items; everything else routes to review.</span>
+        <span class="unit">%</span>
+        <span class="gatebar-note">Heuristic rule from the business case: auto-post needs overall confidence at or above the gate <em>and</em> totals that cross-validate against the line items; everything else routes to review.</span>
       </div>
       <div id="result">
-        <div class="empty">No result yet.</div>
+        <div class="plate">No findings yet &mdash; load a sample or paste a document, then extract.</div>
       </div>
       <div class="exports" id="exports" style="display:none;">
         <button class="ghost" id="copy-all">Copy all fields</button>
         <button class="ghost" id="dl-json">Download JSON</button>
         <button class="ghost" id="dl-record">Download full record (CSV)</button>
         <button class="ghost" id="dl-csv">Download line items (CSV)</button>
+      </div>
+    </section>
+
+    <!-- Batch results (hidden until a multi-file batch runs) -->
+    <section class="card" id="batch-card" style="display:none;">
+      <h2>Batch results</h2>
+      <p class="muted" id="batch-summary"></p>
+      <div class="scroll-x"><div id="batch-table"></div></div>
+      <div class="exports">
+        <button class="ghost" id="dl-batch-csv">Download combined records (CSV)</button>
+        <button class="ghost" id="dl-batch-json">Download batch JSON</button>
+        <button class="ghost" id="batch-close">Dismiss batch</button>
       </div>
     </section>
   </main>
@@ -263,8 +603,19 @@ Goods received in good condition. Please sign and return one copy.`
 
   const $ = (id) => document.getElementById(id);
   const input = $("input");
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)");
   let lastResult = null;
   let batchResults = null;
+
+  // The gate, priced — committed figures from docs/BUSINESS_CASE.md parameters
+  // applied to the 27-document synthetic eval set (eval/cost_results.json).
+  // Modeled, not measured; regenerate with `python -m eval.run_cost`.
+  const ECONOMICS = {
+    reviewCost: "0.40",   // EUR per pre-filled review confirm
+    errorCost: "25.00",   // EUR per silently wrong auto-post
+    breakEven: 98.4,      // % precision above which auto-posting pays
+    measured: 87.5        // % measured combined-gate precision on that set
+  };
 
   $("sample").addEventListener("change", (e) => {
     if (!SAMPLES[e.target.value]) return;
@@ -309,6 +660,22 @@ Goods received in good condition. Please sign and return one copy.`
   function confClass(c) { return c >= 0.85 ? "high" : c >= 0.6 ? "med" : "low"; }
   function pct(c) { return Math.round(c * 100) + "%"; }
   function esc(s) { return String(s).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m])); }
+
+  // The designed confidence unit: severity-colored fill on a same-ramp track,
+  // a tick at the auto-post gate, the numeric value beside it.
+  function meterHtml(conf, opts = {}) {
+    const c = conf || 0;
+    const threshold = opts.threshold ?? gateThreshold();
+    const size = opts.wide ? " meter--wide" : opts.sm ? " meter--sm" : "";
+    const fill = Math.round(Math.max(0, Math.min(1, c)) * 1000) / 10;
+    const tick = Math.round(Math.max(0, Math.min(1, threshold)) * 1000) / 10;
+    return `<span class="meter meter--${confClass(c)}${size}" role="img" ` +
+      `aria-label="confidence ${pct(c)}; auto-post gate at ${pct(threshold)}" ` +
+      `title="confidence ${pct(c)} &middot; gate ${pct(threshold)}">` +
+      `<span class="meter-track"><span class="meter-fill" style="width:${fill}%"></span>` +
+      `<span class="meter-tick" style="left:${tick}%"></span></span>` +
+      `<span class="meter-num">${pct(c)}</span></span>`;
+  }
 
   // --- Confidence gate (auto-post vs. review) ---
   function gateThreshold() {
@@ -373,21 +740,65 @@ Goods received in good condition. Please sign and return one copy.`
   }
 
   // Replay the returned trace events one-by-one (a replay, not a live stream).
-  // delay 0 renders instantly — used when re-opening a document from a batch.
-  async function animateTrace(events, delay = 160) {
+  // delay 0 renders instantly — used when re-opening a document from a batch,
+  // and forced whenever the reader prefers reduced motion.
+  async function animateTrace(events, delay = REDUCED.matches ? 0 : 150) {
+    if (REDUCED.matches) delay = 0;
     const box = $("trace");
     box.innerHTML = "";
+    const list = document.createElement("ol");
+    list.className = "timeline";
+    box.appendChild(list);
     for (const ev of events) {
-      const row = document.createElement("div");
-      row.className = "ev";
-      row.innerHTML = `<span class="dot ${ev.status}"></span>` +
-        `<span class="step">${ev.step}</span>` +
-        `<span class="stg">${esc(ev.stage)}</span>` +
-        `<span class="msg">${esc(ev.message)}</span>`;
-      box.appendChild(row);
+      const row = document.createElement("li");
+      row.className = "tl tl--" + ev.status;
+      row.innerHTML = `<span class="tl-node" aria-hidden="true"></span>` +
+        `<span class="tl-stage">${esc(ev.stage)}</span>` +
+        `<span class="tl-msg">${esc(ev.message)}</span>`;
+      list.appendChild(row);
       box.scrollTop = box.scrollHeight;
       if (delay) await new Promise(r => setTimeout(r, delay));
     }
+  }
+
+  // The decision, stamped, with the committed economics of that decision
+  // beside it. The stamp restates the disposition in form + glyph + words.
+  function verdictHtml(gate, autoPost) {
+    const reasons = (gate.reasons || []).map(r => `<li>${esc(r)}</li>`).join("");
+    const checkFirst = [
+      ...(gate.fields_below || []),
+      ...(gate.items_below || []).map(p => "line " + p)
+    ];
+    const checkHtml = checkFirst.length
+      ? `<div class="verdict-check" title="confidence below the auto-post gate — never changes the disposition, only marks where a reviewer starts">check first:${checkFirst.map(n => ` <code>${esc(n)}</code>`).join("")}</div>`
+      : "";
+    const stamp = autoPost
+      ? `<span class="stamp stamp--auto"><span class="stamp-glyph" aria-hidden="true">&#10003;</span>auto-post</span>`
+      : `<span class="stamp stamp--review"><span class="stamp-glyph" aria-hidden="true">!</span>needs review</span>`;
+    return `<div class="verdict ${autoPost ? "verdict--auto" : "verdict--review"}">
+      <div class="verdict-stamp">${stamp}</div>
+      <div class="verdict-main">
+        <div class="verdict-kicker">gate disposition</div>
+        <ul class="verdict-reasons">${reasons}</ul>
+        ${checkHtml}
+      </div>
+      <aside class="economics" aria-label="the gate, priced — modeled cost figures">
+        <div class="econ-head">The gate, priced
+          <span class="econ-tag" title="Business-case parameters priced over the 27-document synthetic eval set — see docs/BUSINESS_CASE.md and eval/cost_results.json">modeled, not measured</span>
+        </div>
+        <dl class="econ-rows">
+          <div><dt>review confirm</dt><dd>&euro;${ECONOMICS.reviewCost}<span class="unit">/doc</span></dd></div>
+          <div><dt>silent auto-post error</dt><dd>&euro;${ECONOMICS.errorCost}<span class="unit">/doc</span></dd></div>
+          <div><dt>break-even precision</dt><dd>${ECONOMICS.breakEven}%</dd></div>
+          <div><dt>combined gate, measured</dt><dd>${ECONOMICS.measured}%</dd></div>
+        </dl>
+        <div class="econ-meter" role="img" aria-label="measured auto-post precision ${ECONOMICS.measured}% is below the ${ECONOMICS.breakEven}% break-even">
+          <span class="econ-track"><span class="econ-fill" style="width:${ECONOMICS.measured}%"></span><span class="econ-tick" style="left:${ECONOMICS.breakEven}%"></span></span>
+          <span class="econ-scale"><span>measured ${ECONOMICS.measured}%</span><span>break-even ${ECONOMICS.breakEven}%</span></span>
+        </div>
+        <p class="econ-note">Auto-posting a document saves the &euro;${ECONOMICS.reviewCost} confirm but risks the &euro;${ECONOMICS.errorCost} silent error &mdash; it pays only above ${ECONOMICS.breakEven}% precision. The measured combined gate reaches ${ECONOMICS.measured}%, so routing to review stays the cheap insurance.</p>
+      </aside>
+    </div>`;
   }
 
   function renderResult(data) {
@@ -396,66 +807,80 @@ Goods received in good condition. Please sign and return one copy.`
     const totals = data.totals || {};
     // The server stamps the gate; fall back to the mirrored local rule.
     const gate = data.gate || evaluateGate(data, gateThreshold());
+    const t = gate.threshold ?? gateThreshold();
     const autoPost = gate.disposition === "auto_post";
     const out = [];
 
-    out.push(`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">
-      <span class="pill type-pill">${esc(data.doc_type)}</span>
-      <span class="badge ${confClass(data.confidence || 0)}">overall ${pct(data.confidence || 0)}</span>
-      <span class="pill ${autoPost ? "gate-auto" : "gate-review"}">${autoPost ? "auto-post" : "needs review"}</span>
+    // Specimen plate + overall confidence.
+    out.push(`<div class="fhead">
+      <span class="plate-type">${esc(data.doc_type)}</span>
+      <span class="fhead-overall"><span class="fhead-lbl">overall confidence</span>${meterHtml(data.confidence || 0, { threshold: t, wide: true })}</span>
     </div>`);
-    out.push(`<div class="muted" style="margin-bottom:14px;">gate: ${esc(gate.reasons.join("; "))}</div>`);
 
-    // Header fields
+    // The verdict, stamped, with its economics.
+    out.push(verdictHtml(gate, autoPost));
+
+    // Header fields — the ledger.
+    out.push('<h3 class="sect">Header fields</h3>');
     if (Object.keys(fields).length) {
-      out.push('<div class="kv">');
+      out.push('<div class="ledger">');
       for (const [k, f] of Object.entries(fields)) {
         const flag = gate.fields_below.includes(k)
-          ? `<span class="badge med" title="confidence below the auto-post gate — check this first when reviewing">below gate</span>`
+          ? `<span class="flag" title="confidence below the auto-post gate — check this first when reviewing">below gate</span>`
           : "";
-        out.push(`<div class="k">${esc(k)}</div><div class="v">${esc(f.value)}</div>` +
-          `<div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">` + flag +
-          `<span class="badge ${confClass(f.confidence)}">${pct(f.confidence)}</span>` +
-          `<button class="copy" data-copy="${esc(f.value)}" title="Copy ${esc(k)} to clipboard">copy</button></div>`);
+        out.push(`<div class="frow"><span class="fkey">${esc(k)}</span>` +
+          `<span class="fleader" aria-hidden="true"></span>` +
+          `<span class="fval">${esc(f.value)}</span>` +
+          `<span class="fmeta">${flag}${meterHtml(f.confidence, { threshold: t })}` +
+          `<button class="copy" data-copy="${esc(f.value)}" title="Copy ${esc(k)} to clipboard">copy</button></span></div>`);
       }
       out.push('</div>');
     } else {
-      out.push('<div class="empty">No header fields detected.</div>');
+      out.push('<div class="plate">No header fields detected.</div>');
     }
 
-    // Line items
+    // Line items.
     if (items.length) {
-      out.push('<table><thead><tr><th>#</th><th>Description</th><th>Qty</th><th>Unit</th><th>Unit price</th><th>Amount</th><th>Conf.</th></tr></thead><tbody>');
+      out.push('<h3 class="sect">Line items</h3>');
+      out.push('<div class="scroll-x"><table><thead><tr><th>#</th><th>Description</th><th class="num">Qty</th><th>Unit</th><th class="num">Unit price</th><th class="num">Amount</th><th>Confidence</th></tr></thead><tbody>');
       for (const it of items) {
+        const flag = gate.items_below.includes(it.position)
+          ? ' <span class="flag" title="confidence below the auto-post gate">below gate</span>' : "";
         out.push(`<tr>
-          <td>${esc(it.position)}</td>
+          <td class="num">${esc(it.position)}</td>
           <td>${esc(it.description)}</td>
           <td class="num">${esc(fmt(it.quantity))}</td>
           <td>${esc(it.unit ?? "")}</td>
           <td class="num">${it.unit_price != null ? esc(money(it.unit_price)) : "&ndash;"}</td>
           <td class="num">${it.amount != null ? esc(money(it.amount)) : "&ndash;"}</td>
-          <td><span class="badge ${confClass(it.confidence)}">${pct(it.confidence)}</span>${gate.items_below.includes(it.position) ? ' <span class="badge med" title="confidence below the auto-post gate">below gate</span>' : ""}</td>
+          <td><span class="conf-cell">${meterHtml(it.confidence, { threshold: t, sm: true })}${flag}</span></td>
         </tr>`);
       }
-      out.push('</tbody></table>');
+      out.push('</tbody></table></div>');
     }
 
     // Totals — only meaningful when the document carries monetary figures.
     // An RFQ or delivery note has none; saying "not cross-validated" there
     // reads like a failure, so state plainly that there is nothing to check.
     const hasMoney = ["subtotal", "tax", "total"].some(k => totals[k]) || (totals.computed_line_total || 0) > 0;
+    out.push('<h3 class="sect">Totals</h3>');
     if (hasMoney) {
       const trows = [];
-      for (const key of ["subtotal", "tax", "total"]) {
-        if (totals[key]) trows.push(`<div class="totalsrow"><span class="lbl">${key}</span><span>${esc(money(totals[key].value))} <span class="badge ${confClass(totals[key].confidence)}">${pct(totals[key].confidence)}</span></span></div>`);
+      for (const key of ["subtotal", "tax"]) {
+        if (totals[key]) trows.push(`<div class="trow"><span class="lbl">${key}</span><span class="amt">${esc(money(totals[key].value))}${meterHtml(totals[key].confidence, { threshold: t, sm: true })}</span></div>`);
+      }
+      if (totals.total) {
+        trows.push(`<div class="trow trow--grand"><span class="lbl">total</span><span class="amt">${esc(money(totals.total.value))}${meterHtml(totals.total.confidence, { threshold: t, sm: true })}</span></div>`);
       }
       if (totals.computed_line_total != null) {
-        trows.push(`<div class="totalsrow"><span class="lbl">computed line total</span><span>${esc(money(totals.computed_line_total))}</span></div>`);
+        trows.push(`<div class="trow"><span class="lbl">computed line total</span><span class="amt">${esc(money(totals.computed_line_total))}</span></div>`);
       }
-      out.push('<div style="max-width:420px;margin-top:14px;">' + trows.join("") +
-        `<div class="totalsrow"><span class="lbl">validation</span><span class="${totals.validated ? "valid" : "invalid"}">${totals.validated ? "✓ totals match line items" : "not cross-validated"}</span></div></div>`);
+      trows.push(`<div class="trow"><span class="lbl">validation</span><span class="amt">${totals.validated
+        ? '<span class="rstamp rstamp--pass"><span aria-hidden="true">&#10003;</span>totals match line items</span>'
+        : '<span class="rstamp rstamp--warn"><span aria-hidden="true">!</span>not cross-validated</span>'}</span></div>`);
+      out.push('<div class="totals">' + trows.join("") + '</div>');
     } else {
-      out.push('<div class="muted" style="margin-top:14px;">No monetary totals in this document type &mdash; nothing to cross-validate.</div>');
+      out.push('<div class="plate">No monetary totals in this document type &mdash; nothing to cross-validate.</div>');
     }
 
     // Business-rule validation — the structural second gate (server-computed).
@@ -466,28 +891,27 @@ Goods received in good condition. Please sign and return one copy.`
   }
 
   // Renders the field-level business-rule report from docextract/validation.py.
-  // The engine computes it; the UI only displays the applicable checks.
+  // The engine computes it; the UI only displays the applicable checks —
+  // each verdict a small stamp: form + glyph + label, color only restating.
   function renderValidation(v) {
-    const glyph = { pass: "&#10003;", fail: "&#10007;", skip: "&ndash;" };
     const rows = [];
     for (const c of v.checks || []) {
       if (c.status === "skip") continue;  // not applicable — hide the noise
-      const color = c.status === "pass" ? "var(--ok)"
-        : (c.severity === "warning" ? "var(--warn)" : "var(--bad)");
-      const tag = c.status === "fail" && c.severity === "warning" ? " (warning)" : "";
-      rows.push(`<div style="display:flex;gap:8px;align-items:baseline;font-size:12.5px;margin:2px 0;">
-        <span style="color:${color};font-family:var(--mono);width:14px;">${glyph[c.status]}</span>
-        <span class="muted" style="min-width:150px;">${esc(c.rule)}${tag}</span>
-        <span style="color:${color === "var(--ok)" ? "var(--muted)" : color};">${esc(c.message)}</span></div>`);
+      const warnFail = c.status === "fail" && c.severity === "warning";
+      const cls = c.status === "pass" ? "pass" : warnFail ? "warn" : "fail";
+      const glyph = c.status === "pass" ? "&#10003;" : warnFail ? "!" : "&#10007;";
+      rows.push(`<li class="rulerow rulerow--${cls}">
+        <span class="rstamp rstamp--${cls}"><span aria-hidden="true">${glyph}</span>${cls}</span>
+        <span class="rname">${esc(c.rule)}</span>
+        <span class="rscope">${esc(c.scope)}</span>
+        <span class="rmsg">${esc(c.message)}</span></li>`);
     }
-    const clean = v.review_recommended
-      ? `<span class="pill gate-review">${v.errors} rule${v.errors === 1 ? "" : "s"} to review</span>`
-      : `<span class="pill gate-auto">all business rules clear</span>`;
-    const skipped = v.checks_skipped ? ` <span class="muted">(${v.checks_skipped} not applicable)</span>` : "";
-    return `<div style="margin-top:18px;">
-      <div style="margin-bottom:8px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;">business rules ${clean}${skipped}</div>
-      ${rows.join("") || '<div class="muted">No applicable business rules for this document.</div>'}
-    </div>`;
+    const verdict = v.review_recommended
+      ? `<span class="rstamp rstamp--warn"><span aria-hidden="true">!</span>${v.errors} rule${v.errors === 1 ? "" : "s"} to review</span>`
+      : `<span class="rstamp rstamp--pass"><span aria-hidden="true">&#10003;</span>all business rules clear</span>`;
+    const skipped = v.checks_skipped ? `<span class="sect-note">(${v.checks_skipped} not applicable)</span>` : "";
+    return `<h3 class="sect">Business rules ${verdict}${skipped}</h3>
+      <ul class="rules">${rows.join("") || '<li class="plate">No applicable business rules for this document.</li>'}</ul>`;
   }
 
   function fmt(n) {
@@ -646,18 +1070,21 @@ Goods received in good condition. Please sign and return one copy.`
     batchResults.summary = { documents: results.length, auto_post: auto, review: results.length - auto, gate_threshold: t };
     $("batch-summary").textContent = results.length + " document(s) — " + auto + " auto-post, " +
       (results.length - auto) + " for review (gate " + pct(t) + "). Open a row to see its full result below.";
-    const out = ['<table><thead><tr><th>#</th><th>File</th><th>Type</th><th>Doc number</th><th>Overall</th><th>Gate</th><th>Items</th><th></th></tr></thead><tbody>'];
+    const out = ['<table><thead><tr><th class="num">#</th><th>File</th><th>Type</th><th>Doc number</th><th>Overall</th><th>Gate</th><th class="num">Items</th><th></th></tr></thead><tbody>'];
     results.forEach((r, i) => {
       const g = r.gate || {};
       const autoPost = g.disposition === "auto_post";
       const docNo = r.fields && r.fields.document_number ? esc(r.fields.document_number.value) : "&ndash;";
+      const gateStamp = autoPost
+        ? `<span class="rstamp rstamp--pass" title="${esc((g.reasons || []).join("; "))}"><span aria-hidden="true">&#10003;</span>auto-post</span>`
+        : `<span class="rstamp rstamp--warn" title="${esc((g.reasons || []).join("; "))}"><span aria-hidden="true">!</span>review</span>`;
       out.push(`<tr>
-        <td>${i + 1}</td>
+        <td class="num">${i + 1}</td>
         <td>${esc(r.name)}</td>
-        <td><span class="pill type-pill">${esc(r.doc_type)}</span></td>
+        <td><span class="plate-type">${esc(r.doc_type)}</span></td>
         <td>${docNo}</td>
-        <td><span class="badge ${confClass(r.confidence || 0)}">${pct(r.confidence || 0)}</span></td>
-        <td><span class="pill ${autoPost ? "gate-auto" : "gate-review"}" title="${esc((g.reasons || []).join("; "))}">${autoPost ? "auto-post" : "review"}</span></td>
+        <td>${meterHtml(r.confidence || 0, { threshold: t, sm: true })}</td>
+        <td>${gateStamp}</td>
         <td class="num">${(r.line_items || []).length}</td>
         <td><button class="ghost" data-open="${i}">Open</button></td>
       </tr>`);
@@ -667,7 +1094,7 @@ Goods received in good condition. Please sign and return one copy.`
     $("batch-card").style.display = "";
   }
 
-  // Open a batch row in the trace + structured-result panels (instant trace).
+  // Open a batch row in the trace + findings panels (instant trace).
   $("batch-table").addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-open]");
     if (!btn || !batchResults) return;
