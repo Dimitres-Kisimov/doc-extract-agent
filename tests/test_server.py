@@ -52,6 +52,20 @@ def test_extract_roundtrip(base_url: str) -> None:
     assert data["fields"]["document_number"]["value"] == "INV-1"
 
 
+def test_extract_response_carries_source_spans(base_url: str) -> None:
+    # The provenance the side-by-side view highlights with rides in the same
+    # /extract payload — no extra route, no second request.
+    text = _sample("invoice.txt")
+    body = json.dumps({"text": text}).encode()
+    with _post(base_url + "/extract", body) as resp:
+        data = json.loads(resp.read())
+    span = data["fields"]["document_number"]["span"]
+    assert text[span["start"]:span["end"]] == span["text"] == "INV-2026-8842"
+    assert data["line_items"][0]["spans"]["amount"]["text"] == "60.00"
+    assert data["totals"]["total"]["span"]["text"] == "124.95"
+    assert data["totals"]["derived"] == ["computed_line_total"]
+
+
 def test_unknown_route_is_json_404(base_url: str) -> None:
     with pytest.raises(urllib.error.HTTPError) as excinfo:
         urllib.request.urlopen(base_url + "/nope", timeout=10)

@@ -69,6 +69,9 @@ def extract_document(
     Returns:
         A dict with keys ``doc_type``, ``fields``, ``line_items``, ``totals``,
         ``confidence`` (overall, in [0, 1]) and ``trace`` (list of events).
+        Every value read off the page also carries its source ``span``
+        (:mod:`docextract.spans`); values the engine computed instead are named
+        under ``derived`` and carry no span.
 
     The pipeline never raises on malformed input — it degrades to
     ``doc_type = "unknown"`` with an empty result and a trace explaining why.

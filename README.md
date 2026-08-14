@@ -4,7 +4,7 @@ Picture a three-person AP & order-desk team keying ~60,000 supplier invoices, or
 
 Paste a business document — an RFQ email, an invoice, a delivery note — and get structured data back: header fields, line items, and totals that are cross-checked against the line items, each with a confidence score, a layer of field-level business-rule checks (per-line and total arithmetic, required-field completeness, IBAN/VAT format), and a step-by-step trace of how it got there.
 
-![doc-extract-agent web UI — inspection-bench layout: the document on the left with the pipeline-trace timeline beneath it; findings on the right with the stamped auto-post verdict, the cost-model economics beside it, and per-field confidence meters (invoice sample, light theme)](docs/img/ui.png)
+![doc-extract-agent web UI — inspection-bench layout: the original document on the left, rendered as a line-numbered sheet with every extracted value underlined where it was read and the invoice number highlighted; findings on the right with the stamped auto-post verdict, the cost-model economics beside it, and per-field confidence meters, the matching document_number row highlighted in step (invoice sample, light theme)](docs/img/ui.png)
 
 This is the "unstructured document in, structured record out" loop that sits under a lot of Data & AI automation work, and I built it while learning that space for internship applications. It complements a sibling project, `agentic-automation-lab`. Everything runs on Python's standard library — no dependencies, no API key, no build step.
 
@@ -21,6 +21,7 @@ Open http://127.0.0.1:8000, pick a sample from the dropdown or paste your own te
 ```
 POST /extract        {"text": "<document text>", "gate_threshold": 0.85}
                      →  {doc_type, fields, line_items, totals, confidence, validation, gate, trace}
+                        (each extracted value carries the source span it was read from — below)
 
 POST /extract/batch  {"documents": [{"name": "a.txt", "text": "..."}, ...], "gate_threshold": 0.85}
                      →  {results: [{name, ...same shape as /extract}], summary: {documents, auto_post, review, gate_threshold}}
@@ -48,6 +49,29 @@ Every result is then stamped by the **confidence gate** — the heuristic rule f
 Alongside the confidence gate, every result also runs through a **business-rule validation** layer — the structural check an AP clerk does by eye before posting. It re-derives nothing; it reuses the numbers already extracted and asserts they hang together: each line's `quantity × unit_price = amount`, `subtotal + tax = total`, the line items reconcile to the stated total (reusing the totals cross-check), the mandatory header fields for the document type are all present, dates are in order, and a labelled IBAN passes its ISO 13616 mod-97 checksum (a labelled VAT id is shape-checked per country). Each rule reports pass / fail / skip; any hard failure sets `review_recommended`. This is the layer that catches what confidence structurally can't: a *silently dropped* field lowers no confidence average, but the required-field rule turns that omission into an explicit review signal. The measured effect is [below](#the-structural-second-gate-business-rule-validation).
 
 For the stack-of-emails case there's a **batch mode**: drop several `.txt`/`.eml` files onto the textarea (or pick them with "Batch files…") and they're all extracted in one request. You get a results table — file, type, document number, overall confidence, auto-post/review per document — any row opens into the full trace and result panels, and two combined exports: one CSV of full records across all documents (prefixed with source file and gate disposition) and the whole batch as JSON. `.eml` files are read as plain text; there's no MIME or quoted-reply cleanup yet.
+
+## Side by side: every value traced to the characters it came from
+
+A number in a findings panel is only worth as much as the reviewer's ability to check it. So the left column stops being an input box once you hit Extract: it becomes the document you submitted, rendered as a line-numbered sheet with **every value the engine read underlined where it was read**. Focus, hover, or click an extracted value on the right and the highlighter lands on its exact characters on the left; go the other way — activate a marked span in the document — and it jumps to the value that came out of it. Both directions are ordinary buttons, so the whole link is keyboard-reachable rather than hover-only, and Esc clears a pinned highlight. The caption states the location in words (`document_number — line 12, column 17: INV-2026-8842`), so the connection survives without color.
+
+This is real provenance, not the UI re-searching the text for something that looks like the answer. Each extractor records the span of the match that produced the value:
+
+```python
+result["fields"]["document_number"]
+# {"value": "INV-2026-8842", "confidence": 0.95,
+#  "span": {"start": 177, "end": 190, "line": 12, "col": 17, "text": "INV-2026-8842"}}
+
+result["line_items"][0]["spans"]["amount"]
+# {"start": 409, "end": 414, "line": 19, "col": 61, "text": "60.00"}
+```
+
+Spans ride inside the existing `/extract` payload — no second route, no second pass. Offsets are half-open **code-point** offsets into the text exactly as submitted (Python's own string indexing; the browser indexes the same way, so an emoji cannot shift a highlight by one), and `text` is the source slice itself, which the UI checks against the document before highlighting anything — a span that does not match is reported as *not located* rather than drawn somewhere plausible.
+
+Three honest edges, all visible in the UI rather than hidden:
+
+- **A computed value has no span, and says so.** The line-item sum (`computed_line_total`), and a unit price back-calculated from amount ÷ quantity on a row that states no amount, are arithmetic — they appear nowhere on the page. The engine names them in `derived`; the UI marks them `†` ("derived by the pipeline — computed rather than read, so there are no characters in the document to highlight") instead of pointing at a nearby figure. The counter above the sheet states the split: *25 of 26 extracted values located in this document · 1 derived (no span)*.
+- **A span is the source evidence, not a copy of the value.** A currency inferred from a "€" symbol carries the span of the symbol; a European-formatted `1.234,56` carries those characters while the value is `1234.56`. Where the two differ, the caption says so (`→ read as 1234.56`).
+- **What it is not.** The sheet is the plain text you submitted — there is no PDF or scan rendering behind it, so a span is a character range, never a pixel region on an image.
 
 ## The two bugs that made me write real tests
 
@@ -221,6 +245,7 @@ ECE (0.088) and Brier (0.044) summarise this as "close on average, with one genu
 
 - The extraction is a deterministic heuristic (regex plus column-aware table parsing), not a real LLM. That's on purpose — it keeps the demo offline and reproducible — but it's tuned for clean, well-structured documents.
 - Messy scans, OCR noise, multi-page tables, unusual layouts, or languages outside the sample style will drop or miss fields.
+- Provenance covers what the engine *reads*: header fields, the line-item columns, and the stated totals. Anything it computes has no span by design (above), and a span is a character range in the submitted text — not a region on a scanned page.
 - For production, the pipeline is already built around an `LLMProvider` interface. Set `DOCEXTRACT_PROVIDER=anthropic` (plus `ANTHROPIC_API_KEY`) and each stage routes its extraction through a real model — the stages, trace, confidence, and validation logic stay put.
 
 ## Tests
@@ -231,7 +256,7 @@ ruff check .
 pytest -q
 ```
 
-The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, the gate's operating stats are recomputed from the per-document results, the failure-mode breakdown is checked to cover exactly the imperfect documents and to reconcile with the per-field accuracy table, and the confidence calibration is checked both on hand-verifiable arithmetic and on the committed set (the reliability table partitions every extracted prediction, and the over-confident currency-fallback bucket is pinned). The business-rule validation layer has its own suite — each rule's pass/fail/skip path on hand-built records, the ISO 13616 IBAN vectors, the VAT-id-vs-tax-line disambiguation, the warning-doesn't-force-review split, a collapses-to-base-case check (a clean invoice passes every rule) and the measured combined-gate precision lift (70% → 87.5%) pinned against the committed results. The cost model has its own suite too: the business-case anchors recomputed by hand (€0.40 review, €2.8833/doc and €173,000/yr manual baseline), each policy's per-document cost checked against its exact fraction, break-even consistency (at exactly the break-even precision the expected error cost equals the review cost saved), collapse-to-base-case checks (free errors leave only review labour; a review priced at the full keying time reproduces the manual baseline), input validation, determinism, and the committed `eval/cost_results.json` verified byte-for-byte against regeneration. Regenerate the numbers any time with `python -m eval.run_eval` followed by `python -m eval.run_cost`.
+The suite runs the three shipped samples end to end, feeds the pipeline garbage to check it never crashes, and pins the provenance layer: across all 30 committed documents (3 samples + the 27-document eval set) every span must satisfy `text[start:end] == span["text"]` *and* address that same slice at its stated line/column, header fields and stated totals must always be located, and anything named in `derived` must have no span at all — plus the specific placements (the invoice number is the identifier and not its label, the buyer is the line after "Bill To:", each line-item column points at its own cell), the honest edges (a back-calculated unit price is derived, an inferred currency's span is the "€" it was inferred from, a European `1.234,56` keeps its source formatting), code-point offsets past an emoji, CRLF documents, and garbage input never producing a broken span. It also covers the evaluation harness: dataset generation is byte-for-byte deterministic (and the committed set is verified against a fresh regeneration), the scorer is checked on a hand-verified document pair, the gate's operating stats are recomputed from the per-document results, the failure-mode breakdown is checked to cover exactly the imperfect documents and to reconcile with the per-field accuracy table, and the confidence calibration is checked both on hand-verifiable arithmetic and on the committed set (the reliability table partitions every extracted prediction, and the over-confident currency-fallback bucket is pinned). The business-rule validation layer has its own suite — each rule's pass/fail/skip path on hand-built records, the ISO 13616 IBAN vectors, the VAT-id-vs-tax-line disambiguation, the warning-doesn't-force-review split, a collapses-to-base-case check (a clean invoice passes every rule) and the measured combined-gate precision lift (70% → 87.5%) pinned against the committed results. The cost model has its own suite too: the business-case anchors recomputed by hand (€0.40 review, €2.8833/doc and €173,000/yr manual baseline), each policy's per-document cost checked against its exact fraction, break-even consistency (at exactly the break-even precision the expected error cost equals the review cost saved), collapse-to-base-case checks (free errors leave only review labour; a review priced at the full keying time reproduces the manual baseline), input validation, determinism, and the committed `eval/cost_results.json` verified byte-for-byte against regeneration. Regenerate the numbers any time with `python -m eval.run_eval` followed by `python -m eval.run_cost`.
 
 ## Next
 

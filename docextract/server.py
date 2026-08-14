@@ -8,6 +8,9 @@ Serves the interactive UI from ``web/`` and exposes two JSON endpoints:
     "line_items", "totals", "confidence", "gate", "trace"}`` — what
     :func:`docextract.extract_document` returns, stamped with the
     auto-post/review disposition from :func:`docextract.evaluate_gate`.
+    Extracted values carry their source ``span`` (see :mod:`docextract.spans`)
+    inside this same payload, which is what the UI highlights the original
+    document with — there is no separate provenance endpoint.
 
 ``POST /extract/batch``
     Request body:  ``{"documents": [{"name": "a.txt", "text": "..."}, ...],

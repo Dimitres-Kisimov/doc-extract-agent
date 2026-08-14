@@ -40,6 +40,12 @@
       --warn: #a36b00;  --warn-ink: #7a5300; --warn-track: #f3e2c0; --warn-wash: #f9f2e2;
       --bad: #d03b3b;   --bad-ink: #b8322c;  --bad-track: #f6d6d6;  --bad-wash: #fbeeee;
       --focus: #1c5cab;
+      /* provenance — the sheet, the pencil underline, the highlighter */
+      --paper: #fbf8ef;
+      --prov-line: #a8762b;   /* 3.7:1 on paper — the "this was read" underline */
+      --hl: #efc94f;          /* highlighter wash; ink on it clears 11:1 */
+      --hl-edge: #8f6a1a;
+      --hl-ink: #171613;
       --shadow: 0 1px 2px rgba(23, 22, 19, .05), 0 4px 14px rgba(23, 22, 19, .05);
       --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
       --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -66,6 +72,11 @@
         --warn: #eda100;  --warn-ink: #fab219; --warn-track: #423413; --warn-wash: #262013;
         --bad: #e66767;   --bad-ink: #e66767;  --bad-track: #46201f; --bad-wash: #291717;
         --focus: #6da7ec;
+        --paper: #161614;
+        --prov-line: #9c7a35;
+        --hl: #5a4512;
+        --hl-edge: #c69a37;
+        --hl-ink: #f8f0dd;
         --shadow: none;
       }
     }
@@ -159,6 +170,91 @@
     }
     textarea.drag { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-track); }
     .status { margin: 10px 0 0; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+    /* --- the original, as paper --------------------------------------------
+       Once a document has been extracted the left column stops being an input
+       box and becomes the sheet itself: ruled with line numbers, with every
+       value the engine read underlined *where it was read*. Focus or hover an
+       extracted value on the right and the highlighter lands on its characters
+       here; do it the other way round and the value lights up on the right.
+       The caption states line and column, so the link survives without color,
+       and a value the engine computed says so instead of pointing anywhere. */
+    .provbar {
+      display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 8px; font-size: 11.5px; color: var(--muted);
+    }
+    .prov-count {
+      font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+      letter-spacing: .02em;
+    }
+    .prov-legend { flex: 1 1 240px; }
+    .lg-read { text-decoration: underline dotted var(--prov-line); text-underline-offset: 3px; }
+    .lg-hit {
+      background: var(--hl); color: var(--hl-ink);
+      box-shadow: 0 0 0 1px var(--hl-edge); border-radius: 2px; padding: 0 3px;
+    }
+    .prov-caption {
+      margin: 0 0 10px; min-height: 32px; font-size: 12px; color: var(--ink-2);
+      border-left: 2px solid var(--rule); padding: 2px 0 2px 10px;
+    }
+    .prov-caption b { font-family: var(--mono); font-weight: 600; }
+    .prov-caption .cap-src {
+      font-family: var(--mono); background: var(--hl); color: var(--hl-ink);
+      border-radius: 2px; padding: 0 4px; box-shadow: 0 0 0 1px var(--hl-edge);
+    }
+    .paper {
+      max-height: 460px; overflow: auto;
+      background: var(--paper); border: 1px solid var(--rule); border-radius: 4px;
+      padding: 10px 8px 10px 0;
+      font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    }
+    .paper.drag { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-track); }
+    .srcline { display: flex; gap: 8px; width: max-content; min-width: 100%; }
+    .lno {
+      position: sticky; left: 0; z-index: 1; flex: none; width: 28px;
+      padding-right: 6px; text-align: right; color: var(--muted);
+      background: var(--paper); border-right: 1px solid var(--hairline);
+      font-size: 11px; font-variant-numeric: tabular-nums; user-select: none;
+    }
+    .ltext { white-space: pre; }
+    /* A located value: a pencil underline in the source, a highlighter when active. */
+    button.prov {
+      display: inline; font: inherit; line-height: inherit; color: inherit;
+      background: none; border: 0; padding: 0; margin: 0; white-space: pre;
+      cursor: pointer; border-radius: 2px;
+      text-decoration: underline dotted var(--prov-line); text-underline-offset: 3px;
+    }
+    button.prov:hover { text-decoration-style: solid; }
+    button.prov--hit {
+      background: var(--hl); color: var(--hl-ink);
+      box-shadow: 0 0 0 1px var(--hl-edge);
+      text-decoration-color: var(--hl-edge);
+    }
+
+    /* Probes — the extracted side of the link. Every value that can be traced
+       is a button, so the highlight is reachable by keyboard, not just hover. */
+    button.fprobe, button.cprobe, button.tprobe {
+      font: inherit; color: inherit; background: none; border: 0;
+      text-align: inherit; cursor: pointer; border-radius: 3px;
+    }
+    button.fprobe { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 2px 4px; margin: 0 -4px; }
+    button.cprobe { padding: 1px 4px; margin: 0 -4px; }
+    button.tprobe { padding: 1px 4px; margin: 0 -4px; color: var(--muted); }
+    button.fprobe:hover .fval, button.cprobe:hover, button.tprobe:hover { text-decoration: underline dotted var(--prov-line); text-underline-offset: 3px; }
+    .probe--hit, .probe--hit .fkey, .probe--hit .fval, .probe--hit .floc {
+      background: var(--hl); color: var(--hl-ink);
+    }
+    .probe--hit { box-shadow: inset 0 0 0 1px var(--hl-edge); }
+    .probe--dry { box-shadow: inset 0 0 0 1px var(--ctrl-border); background: var(--well); }
+    .probe--hit .fleader { border-bottom-color: var(--hl-edge); }
+    /* Marginalia: which source line a value came from, stated in text. */
+    .floc {
+      flex: none; font-family: var(--mono); font-size: 10px; color: var(--muted);
+      letter-spacing: .02em; white-space: nowrap;
+    }
+    .floc--none { border: 1px dashed var(--ctrl-border); border-radius: 3px; padding: 0 4px; }
+    .dmark { font-size: 11px; color: var(--muted); }
+    .dnote { margin: 6px 0 0; color: var(--muted); font-size: 11.5px; }
 
     /* --- trace: the bench log, a quiet timeline --------------------------- */
     .trace { max-height: 300px; overflow-y: auto; }
@@ -472,9 +568,18 @@
         <button class="ghost" id="batch-btn" title="Extract several .txt/.eml files in one go">Batch files&hellip;</button>
         <input type="file" id="batch-files" multiple accept=".txt,.eml,text/plain" style="display:none;" />
         <button class="ghost" id="clear">Clear</button>
+        <button class="ghost" id="edit-doc" style="display:none;" title="Return to the editable text (the highlights come back on the next extraction)">Edit text</button>
         <button class="primary" id="extract">Extract &rarr;</button>
       </div>
       <textarea id="input" aria-label="Document text" placeholder="Paste a document here, or drop .txt files &mdash; several at once runs a batch&hellip; (Ctrl+Enter extracts)"></textarea>
+      <div id="source-wrap" hidden>
+        <div class="provbar">
+          <span class="prov-count" id="prov-count"></span>
+          <span class="prov-legend"><span class="lg-read">underlined</span> = read from this document &middot; <span class="lg-hit">highlighted</span> = the value in focus &middot; <span class="dmark">&dagger;</span> = derived, no source span</span>
+        </div>
+        <p class="prov-caption" id="prov-caption">Focus or click any extracted value to see the characters it was read from. <span class="muted">Esc clears.</span></p>
+        <div class="paper" id="source" role="group" aria-label="Original document; extracted values are buttons that highlight their source"></div>
+      </div>
       <p class="status" id="status" aria-live="polite">Ready.</p>
     </section>
 
@@ -606,6 +711,7 @@ Goods received in good condition. Please sign and return one copy.`
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)");
   let lastResult = null;
   let batchResults = null;
+  let batchTexts = [];   // the text each batch result was extracted from
 
   // The gate, priced — committed figures from docs/BUSINESS_CASE.md parameters
   // applied to the 27-document synthetic eval set (eval/cost_results.json).
@@ -616,6 +722,21 @@ Goods received in good condition. Please sign and return one copy.`
     breakEven: 98.4,      // % precision above which auto-posting pays
     measured: 87.5        // % measured combined-gate precision on that set
   };
+
+  // The left column has two states: the editable text, and — once a document
+  // has been extracted — that same text rendered as the sheet it came from,
+  // with the extraction's spans marked on it.
+  function showSource(show) {
+    $("source-wrap").hidden = !show;
+    input.style.display = show ? "none" : "";
+    $("edit-doc").style.display = show ? "" : "none";
+  }
+
+  $("edit-doc").addEventListener("click", () => {
+    showSource(false);
+    input.focus();
+    setStatus("Editing the document — extract again to refresh the highlights.");
+  });
 
   $("sample").addEventListener("change", (e) => {
     if (!SAMPLES[e.target.value]) return;
@@ -628,25 +749,35 @@ Goods received in good condition. Please sign and return one copy.`
       return;
     }
     input.value = SAMPLES[e.target.value];
+    showSource(false);
     setStatus("Sample loaded.");
   });
-  $("clear").addEventListener("click", () => { input.value = ""; $("sample").value = ""; setStatus("Cleared."); });
+  $("clear").addEventListener("click", () => {
+    input.value = ""; $("sample").value = ""; showSource(false); setStatus("Cleared.");
+  });
   $("extract").addEventListener("click", runExtract);
   // Ctrl+Enter (Cmd+Enter on macOS) extracts without leaving the textarea.
   input.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runExtract(); }
   });
 
-  // Drag & drop text files onto the textarea: one file loads it for a single
-  // extraction (unchanged), several files run a batch.
-  ["dragover", "dragenter"].forEach(ev => input.addEventListener(ev, e => { e.preventDefault(); input.classList.add("drag"); }));
-  ["dragleave", "drop"].forEach(ev => input.addEventListener(ev, e => { e.preventDefault(); input.classList.remove("drag"); }));
-  input.addEventListener("drop", (e) => {
+  // Drag & drop text files: one file loads it for a single extraction
+  // (unchanged), several files run a batch. Both the editable textarea and the
+  // source sheet that replaces it accept drops, so a reader inspecting one
+  // document never has to switch back to edit mode to load the next.
+  function handleDrop(e) {
     const files = [...e.dataTransfer.files];
     if (files.length > 1) { runBatch(files); return; }
     const file = files[0];
-    if (file) { const r = new FileReader(); r.onload = () => { input.value = r.result; setStatus("File loaded: " + file.name); }; r.readAsText(file); }
-  });
+    if (file) { const r = new FileReader(); r.onload = () => { input.value = r.result; showSource(false); setStatus("File loaded: " + file.name); }; r.readAsText(file); }
+  }
+  function bindDropTarget(el) {
+    ["dragover", "dragenter"].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.add("drag"); }));
+    ["dragleave", "drop"].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.remove("drag"); }));
+    el.addEventListener("drop", handleDrop);
+  }
+  bindDropTarget(input);
+  bindDropTarget($("source"));
 
   // Batch intake via the file picker (always batch, even for a single file).
   $("batch-btn").addEventListener("click", () => $("batch-files").click());
@@ -729,9 +860,16 @@ Goods received in good condition. Please sign and return one copy.`
       const data = await resp.json();
       if (data.error) { setStatus("Error: " + data.error); return; }
       lastResult = data;
+      // Provenance first: the source pane and the findings are two views of the
+      // same span index, and the findings link into the pane.
+      buildProvenance(data, text);
+      setPinned(null);
+      renderSourcePane();
+      showSource(true);
       await animateTrace(data.trace || []);
       renderResult(data);
-      setStatus("Done — overall confidence " + pct(data.confidence || 0) + ".");
+      setStatus("Done — overall confidence " + pct(data.confidence || 0) +
+        ", " + provCounts.located + " value(s) traced to the document.");
     } catch (err) {
       setStatus("Request failed: " + err.message);
     } finally {
@@ -801,6 +939,309 @@ Goods received in good condition. Please sign and return one copy.`
     </div>`;
   }
 
+  // =======================================================================
+  // Provenance — the original and the extraction, wired together.
+  //
+  // The engine returns, with every value it read, the span it read it from
+  // (docextract/spans.py): {start, end, line, col, text}. Those offsets are
+  // *code points*, so the document is indexed as a code-point array here — an
+  // emoji is one offset to Python and two to a naive JS string index.
+  //
+  // Nothing is highlighted on trust: a span counts as located only if this
+  // document really holds span.text at those offsets. A value the engine
+  // computed instead of reading (a summed line total, a unit price derived
+  // from amount ÷ quantity) has no span, and says exactly that — pointing it
+  // at plausible-looking characters would be a fabricated citation.
+  // =======================================================================
+  const ITEM_COLUMNS = ["position", "description", "quantity", "unit", "unit_price", "amount"];
+  // Why a value can carry no span. The engine names such values in `derived`;
+  // docextract/extractors.py is the only place that adds a name to that list.
+  const DERIVED_NOTE = {
+    unit_price: "back-calculated from amount ÷ quantity",
+    computed_line_total: "summed from the line items"
+  };
+  // The characters Python's str.splitlines() breaks on, so the line numbers
+  // shown here are the line numbers the engine reported.
+  const BREAK_CHARS = "\n\r\v\f\u001c\u001d\u001e\u0085\u2028\u2029";
+  const DEFAULT_CAPTION = 'Focus or click any extracted value to see the characters it was read from. <span class="muted">Esc clears.</span>';
+
+  let sourceCps = [];        // the document, indexed the way the engine indexed it
+  let provInfo = new Map();  // probe key -> {label, value, span, note}
+  let provCounts = { located: 0, derived: 0, missing: 0 };
+  let pinned = null;         // {probe, keys, caption} the reader clicked, or null
+
+  function hasMonetaryTotals(totals) {
+    return ["subtotal", "tax", "total"].some(k => totals[k]) || (totals.computed_line_total || 0) > 0;
+  }
+
+  function buildProvenance(result, text) {
+    sourceCps = Array.from(text);
+    provInfo = new Map();
+    provCounts = { located: 0, derived: 0, missing: 0 };
+    const add = (key, label, value, span, note) => {
+      const located = !note && !!span && sourceCps.slice(span.start, span.end).join("") === span.text;
+      if (located) provCounts.located++;
+      else if (note) provCounts.derived++;
+      else provCounts.missing++;
+      provInfo.set(key, {
+        label, value,
+        span: located ? span : null,
+        note: note || (located ? "" : "not located in the source text")
+      });
+    };
+
+    for (const [name, f] of Object.entries(result.fields || {})) add("f:" + name, name, f.value, f.span, "");
+    for (const it of (result.line_items || [])) {
+      const spans = it.spans || {};
+      const derived = it.derived || [];
+      for (const col of ITEM_COLUMNS) {
+        const raw = it[col];
+        if (raw === null || raw === undefined || raw === "") continue;
+        // Carry the value formatted the way the findings table prints it, so a
+        // caption only reports "read as ..." when the source really differs.
+        const value = col === "unit_price" || col === "amount" ? money(raw)
+          : col === "quantity" ? fmt(raw) : raw;
+        add(`i:${it.position}:${col}`, `line ${it.position} · ${col}`, value, spans[col],
+            derived.includes(col) ? (DERIVED_NOTE[col] || "computed by the pipeline") : "");
+      }
+    }
+    const totals = result.totals || {};
+    for (const key of ["subtotal", "tax", "total"]) {
+      if (totals[key]) add("t:" + key, key, money(totals[key].value), totals[key].span, "");
+    }
+    if (hasMonetaryTotals(totals) && totals.computed_line_total != null) {
+      add("t:computed_line_total", "computed line total", money(totals.computed_line_total), null,
+          (totals.derived || []).includes("computed_line_total")
+            ? DERIVED_NOTE.computed_line_total : "");
+    }
+  }
+
+  // Split the document the way str.splitlines() does, in code-point offsets.
+  function sourceLines() {
+    const out = [];
+    let start = 0;
+    for (let i = 0; i < sourceCps.length; i++) {
+      if (!BREAK_CHARS.includes(sourceCps[i])) continue;
+      out.push([start, i]);
+      if (sourceCps[i] === "\r" && sourceCps[i + 1] === "\n") i++;
+      start = i + 1;
+    }
+    if (start < sourceCps.length) out.push([start, sourceCps.length]);
+    return out;
+  }
+
+  // Render the document as the sheet it is, with every located span a button.
+  // Segment boundaries are the span edges, so overlapping spans still split
+  // cleanly and each piece knows every value it belongs to.
+  function renderSourcePane() {
+    const leaves = [];
+    provInfo.forEach((info, key) => { if (info.span) leaves.push({ key, span: info.span }); });
+    const out = [];
+    sourceLines().forEach(([lineStart, lineEnd], index) => {
+      const covering = leaves.filter(l => l.span.start < lineEnd && l.span.end > lineStart);
+      const stops = new Set([lineStart, lineEnd]);
+      covering.forEach(l => {
+        stops.add(Math.max(lineStart, l.span.start));
+        stops.add(Math.min(lineEnd, l.span.end));
+      });
+      const edges = [...stops].sort((a, b) => a - b);
+      let html = "";
+      for (let i = 0; i < edges.length - 1; i++) {
+        const from = edges[i], to = edges[i + 1];
+        const raw = esc(sourceCps.slice(from, to).join(""));
+        const keys = covering.filter(l => l.span.start <= from && l.span.end >= to).map(l => l.key);
+        if (!keys.length) { html += raw; continue; }
+        const label = keys.map(k => provInfo.get(k).label).join(", ");
+        const where = `line ${index + 1}, column ${from - lineStart + 1}`;
+        html += `<button type="button" class="prov" data-keys="${esc(keys.join(" "))}" ` +
+          `title="${esc(label)} — ${where}" ` +
+          `aria-label="${esc(label)}, read from ${where}">${raw}</button>`;
+      }
+      out.push(`<div class="srcline"><span class="lno" aria-hidden="true">${index + 1}</span>` +
+        `<span class="ltext">${html}</span></div>`);
+    });
+    $("source").innerHTML = out.join("") || '<div class="srcline"><span class="ltext muted">(empty document)</span></div>';
+
+    const total = provCounts.located + provCounts.derived + provCounts.missing;
+    const parts = [`${provCounts.located} of ${total} extracted values located in this document`];
+    if (provCounts.derived) parts.push(`${provCounts.derived} derived (no span)`);
+    if (provCounts.missing) parts.push(`${provCounts.missing} not located`);
+    $("prov-count").textContent = total ? "provenance: " + parts.join(" · ") : "provenance: nothing extracted";
+  }
+
+  function captionFor(key) {
+    const info = provInfo.get(key);
+    if (!info) return DEFAULT_CAPTION;
+    const value = esc(String(info.value));
+    if (!info.span) {
+      return `<b>${esc(info.label)}</b> = ${value} &mdash; no source span: ${esc(info.note)}.`;
+    }
+    const parsed = String(info.value) === info.span.text ? "" : ` &rarr; read as <b>${value}</b>`;
+    return `<b>${esc(info.label)}</b> &mdash; line ${info.span.line}, column ${info.span.col}: ` +
+      `<span class="cap-src">${esc(info.span.text)}</span>${parsed}`;
+  }
+
+  function captionForKeys(label, keys) {
+    if (keys.length === 1) return captionFor(keys[0]);
+    if (!keys.length) return `<b>${esc(label)}</b> &mdash; nothing located for this row.`;
+    const lines = [...new Set(keys.map(k => provInfo.get(k).span.line))].sort((a, b) => a - b);
+    return `<b>${esc(label)}</b> &mdash; ${keys.length} values read from source line ` +
+      `${lines.join(", ")}: ` + keys.map(k => `<span class="cap-src">${esc(provInfo.get(k).span.text)}</span>`).join(" ");
+  }
+
+  // Light up one side and its counterpart on the other.
+  function activate(probeKey, keys, caption, opts = {}) {
+    const set = new Set(keys);
+    document.querySelectorAll("#source button.prov").forEach(el => {
+      el.classList.toggle("prov--hit", el.dataset.keys.split(" ").some(k => set.has(k)));
+    });
+    document.querySelectorAll("#result [data-probe]").forEach(el => {
+      const leaves = (el.dataset.leaves || "").split(" ").filter(Boolean);
+      const hit = (probeKey && el.dataset.probe === probeKey) || leaves.some(k => set.has(k));
+      // A value with nothing to point at gets a plain outline, never the
+      // highlighter — the wash means "these characters, over there".
+      el.classList.toggle("probe--hit", hit && leaves.length > 0);
+      el.classList.toggle("probe--dry", hit && leaves.length === 0);
+    });
+    $("prov-caption").innerHTML = caption || DEFAULT_CAPTION;
+    if (opts.scroll) {
+      const first = $("source").querySelector("button.prov--hit");
+      if (first) first.scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED.matches ? "auto" : "smooth" });
+    }
+  }
+
+  function probeKeys(el) {
+    return (el.dataset.leaves || "").split(" ").filter(Boolean);
+  }
+
+  function probeCaption(el) {
+    return provInfo.has(el.dataset.probe)
+      ? captionFor(el.dataset.probe)
+      : captionForKeys(el.dataset.label || "", probeKeys(el));
+  }
+
+  function setPinned(state) {
+    pinned = state;
+    document.querySelectorAll("#result [aria-pressed]").forEach(el => {
+      el.setAttribute("aria-pressed", String(!!pinned && el.dataset.probe === pinned.probe));
+    });
+  }
+
+  // Back to whatever is pinned once a hover or focus ends — nothing, usually.
+  function restore() {
+    if (pinned) activate(pinned.probe, pinned.keys, pinned.caption);
+    else activate(null, [], "");
+  }
+
+  // --- the extracted side: focus or hover a value, highlight its source ---
+  $("result").addEventListener("mouseover", (e) => {
+    const el = e.target.closest("[data-probe]");
+    if (el) activate(el.dataset.probe, probeKeys(el), probeCaption(el));
+  });
+  $("result").addEventListener("mouseout", (e) => {
+    const el = e.target.closest("[data-probe]");
+    if (el && !el.contains(e.relatedTarget)) restore();
+  });
+  $("result").addEventListener("focusin", (e) => {
+    const el = e.target.closest("[data-probe]");
+    if (el) activate(el.dataset.probe, probeKeys(el), probeCaption(el), { scroll: true });
+  });
+  $("result").addEventListener("focusout", (e) => {
+    const el = e.target.closest("[data-probe]");
+    if (el && !el.contains(e.relatedTarget)) restore();
+  });
+  $("result").addEventListener("click", (e) => {
+    const el = e.target.closest("[data-probe]");
+    if (!el) return;
+    if (pinned && pinned.probe === el.dataset.probe) { setPinned(null); restore(); return; }
+    setPinned({ probe: el.dataset.probe, keys: probeKeys(el), caption: probeCaption(el) });
+    activate(pinned.probe, pinned.keys, pinned.caption, { scroll: true });
+  });
+
+  // --- the original side: focus or hover a span, highlight its value ------
+  function markState(mark) {
+    const keys = mark.dataset.keys.split(" ").filter(Boolean);
+    const label = keys.map(k => provInfo.get(k).label).join(", ");
+    return { keys, caption: captionForKeys(label, keys) };
+  }
+  function probeElementFor(key) {
+    return $("result").querySelector(`[data-probe="${key}"]`) ||
+      [...$("result").querySelectorAll("[data-leaves]")].find(el => probeKeys(el).includes(key)) || null;
+  }
+  $("source").addEventListener("mouseover", (e) => {
+    const mark = e.target.closest("button.prov");
+    if (mark) { const s = markState(mark); activate(null, s.keys, s.caption); }
+  });
+  $("source").addEventListener("mouseout", (e) => {
+    const mark = e.target.closest("button.prov");
+    if (mark && !mark.contains(e.relatedTarget)) restore();
+  });
+  $("source").addEventListener("focusin", (e) => {
+    const mark = e.target.closest("button.prov");
+    if (mark) { const s = markState(mark); activate(null, s.keys, s.caption); }
+  });
+  $("source").addEventListener("focusout", (e) => {
+    const mark = e.target.closest("button.prov");
+    if (mark && !mark.contains(e.relatedTarget)) restore();
+  });
+  $("source").addEventListener("click", (e) => {
+    const mark = e.target.closest("button.prov");
+    if (!mark) return;
+    const state = markState(mark);
+    const probe = probeElementFor(state.keys[0]);
+    setPinned({ probe: probe ? probe.dataset.probe : null, keys: state.keys, caption: state.caption });
+    activate(pinned.probe, pinned.keys, pinned.caption);
+    if (probe) probe.focus();  // jump to the extracted value, keyboard included
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && pinned) { setPinned(null); restore(); }
+  });
+
+  // The attributes that make an extracted value traceable.
+  function probeAttrs(key, label) {
+    const info = provInfo.get(key);
+    const title = !info ? ""
+      : info.span
+        ? `read from line ${info.span.line}, column ${info.span.col} — click to pin the highlight`
+        : `no source span: ${info.note}`;
+    return `data-probe="${esc(key)}" data-label="${esc(label)}" ` +
+      `data-leaves="${info && info.span ? esc(key) : ""}" aria-pressed="false" title="${esc(title)}"`;
+  }
+
+  // A line-item row probe: the position cell lights the whole row's spans.
+  function rowProbeAttrs(position) {
+    const keys = ITEM_COLUMNS
+      .map(col => `i:${position}:${col}`)
+      .filter(key => provInfo.get(key) && provInfo.get(key).span);
+    return `data-probe="i:${position}" data-label="line ${position}" data-leaves="${esc(keys.join(" "))}" ` +
+      `aria-pressed="false" title="highlight every value read from source row ${position}"`;
+  }
+
+  // A traced cell. `content` is already-escaped HTML; a derived value gets the
+  // dagger instead of a highlight, because it has no characters to point at.
+  function cellProbe(position, column, content) {
+    const key = `i:${position}:${column}`;
+    const info = provInfo.get(key);
+    if (!info) return content;
+    const dagger = info.span ? "" : ' <span class="dmark" aria-hidden="true">&dagger;</span>';
+    return `<button type="button" class="cprobe" ${probeAttrs(key, `line ${position} · ${column}`)}>${content}${dagger}</button>`;
+  }
+
+  // The footnote the dagger points at, stated wherever a derived value appears.
+  function derivedNoteHtml() {
+    return '<p class="dnote">&dagger; derived by the pipeline &mdash; computed rather than read, ' +
+      'so there are no characters in the document to highlight.</p>';
+  }
+
+  function locChip(key) {
+    const info = provInfo.get(key);
+    if (!info) return "";
+    return info.span
+      ? `<span class="floc" title="source line ${info.span.line}, column ${info.span.col}">l.${info.span.line}</span>`
+      : `<span class="floc floc--none" title="${esc(info.note)}">no span</span>`;
+  }
+
   function renderResult(data) {
     const fields = data.fields || {};
     const items = data.line_items || [];
@@ -821,16 +1262,20 @@ Goods received in good condition. Please sign and return one copy.`
     out.push(verdictHtml(gate, autoPost));
 
     // Header fields — the ledger.
-    out.push('<h3 class="sect">Header fields</h3>');
+    out.push('<h3 class="sect">Header fields <span class="sect-note">focus or click a value to highlight where it was read</span></h3>');
     if (Object.keys(fields).length) {
       out.push('<div class="ledger">');
       for (const [k, f] of Object.entries(fields)) {
         const flag = gate.fields_below.includes(k)
           ? `<span class="flag" title="confidence below the auto-post gate — check this first when reviewing">below gate</span>`
           : "";
-        out.push(`<div class="frow"><span class="fkey">${esc(k)}</span>` +
+        // The key + value are one probe button: focusing it highlights the
+        // characters this value was read from, and "l.12" states the line.
+        out.push(`<div class="frow">` +
+          `<button type="button" class="fprobe" ${probeAttrs("f:" + k, k)}>` +
+          `<span class="fkey">${esc(k)}</span>` +
           `<span class="fleader" aria-hidden="true"></span>` +
-          `<span class="fval">${esc(f.value)}</span>` +
+          `<span class="fval">${esc(f.value)}</span>${locChip("f:" + k)}</button>` +
           `<span class="fmeta">${flag}${meterHtml(f.confidence, { threshold: t })}` +
           `<button class="copy" data-copy="${esc(f.value)}" title="Copy ${esc(k)} to clipboard">copy</button></span></div>`);
       }
@@ -846,39 +1291,45 @@ Goods received in good condition. Please sign and return one copy.`
       for (const it of items) {
         const flag = gate.items_below.includes(it.position)
           ? ' <span class="flag" title="confidence below the auto-post gate">below gate</span>' : "";
+        const cell = (column, content) => cellProbe(it.position, column, content);
         out.push(`<tr>
-          <td class="num">${esc(it.position)}</td>
-          <td>${esc(it.description)}</td>
-          <td class="num">${esc(fmt(it.quantity))}</td>
-          <td>${esc(it.unit ?? "")}</td>
-          <td class="num">${it.unit_price != null ? esc(money(it.unit_price)) : "&ndash;"}</td>
-          <td class="num">${it.amount != null ? esc(money(it.amount)) : "&ndash;"}</td>
+          <td class="num"><button type="button" class="cprobe" ${rowProbeAttrs(it.position)}>${esc(it.position)}</button></td>
+          <td>${cell("description", esc(it.description))}</td>
+          <td class="num">${cell("quantity", esc(fmt(it.quantity)))}</td>
+          <td>${it.unit != null ? cell("unit", esc(it.unit)) : ""}</td>
+          <td class="num">${it.unit_price != null ? cell("unit_price", esc(money(it.unit_price))) : "&ndash;"}</td>
+          <td class="num">${it.amount != null ? cell("amount", esc(money(it.amount))) : "&ndash;"}</td>
           <td><span class="conf-cell">${meterHtml(it.confidence, { threshold: t, sm: true })}${flag}</span></td>
         </tr>`);
       }
       out.push('</tbody></table></div>');
+      if (items.some(it => (it.derived || []).length)) out.push(derivedNoteHtml());
     }
 
     // Totals — only meaningful when the document carries monetary figures.
     // An RFQ or delivery note has none; saying "not cross-validated" there
     // reads like a failure, so state plainly that there is nothing to check.
-    const hasMoney = ["subtotal", "tax", "total"].some(k => totals[k]) || (totals.computed_line_total || 0) > 0;
+    const hasMoney = hasMonetaryTotals(totals);
     out.push('<h3 class="sect">Totals</h3>');
     if (hasMoney) {
       const trows = [];
+      const label = (key, text) => `<button type="button" class="tprobe" ${probeAttrs("t:" + key, text)}>${text}</button>`;
       for (const key of ["subtotal", "tax"]) {
-        if (totals[key]) trows.push(`<div class="trow"><span class="lbl">${key}</span><span class="amt">${esc(money(totals[key].value))}${meterHtml(totals[key].confidence, { threshold: t, sm: true })}</span></div>`);
+        if (totals[key]) trows.push(`<div class="trow"><span class="lbl">${label(key, key)}</span><span class="amt">${esc(money(totals[key].value))}${meterHtml(totals[key].confidence, { threshold: t, sm: true })}</span></div>`);
       }
       if (totals.total) {
-        trows.push(`<div class="trow trow--grand"><span class="lbl">total</span><span class="amt">${esc(money(totals.total.value))}${meterHtml(totals.total.confidence, { threshold: t, sm: true })}</span></div>`);
+        trows.push(`<div class="trow trow--grand"><span class="lbl">${label("total", "total")}</span><span class="amt">${esc(money(totals.total.value))}${meterHtml(totals.total.confidence, { threshold: t, sm: true })}</span></div>`);
       }
       if (totals.computed_line_total != null) {
-        trows.push(`<div class="trow"><span class="lbl">computed line total</span><span class="amt">${esc(money(totals.computed_line_total))}</span></div>`);
+        // The engine's own arithmetic: it appears nowhere on the page, so it
+        // carries the derived dagger instead of a source highlight.
+        trows.push(`<div class="trow"><span class="lbl">${label("computed_line_total", "computed line total")}<span class="dmark" aria-hidden="true">&dagger;</span></span><span class="amt">${esc(money(totals.computed_line_total))}</span></div>`);
       }
       trows.push(`<div class="trow"><span class="lbl">validation</span><span class="amt">${totals.validated
         ? '<span class="rstamp rstamp--pass"><span aria-hidden="true">&#10003;</span>totals match line items</span>'
         : '<span class="rstamp rstamp--warn"><span aria-hidden="true">!</span>not cross-validated</span>'}</span></div>`);
       out.push('<div class="totals">' + trows.join("") + '</div>');
+      out.push(derivedNoteHtml());
     } else {
       out.push('<div class="plate">No monetary totals in this document type &mdash; nothing to cross-validate.</div>');
     }
@@ -888,6 +1339,7 @@ Goods received in good condition. Please sign and return one copy.`
 
     $("result").innerHTML = out.join("");
     $("exports").style.display = "flex";
+    restore();  // re-apply the pinned highlight to the freshly rendered probes
   }
 
   // Renders the field-level business-rule report from docextract/validation.py.
@@ -1052,6 +1504,9 @@ Goods received in good condition. Please sign and return one copy.`
       const data = await resp.json();
       if (data.error) { setStatus("Error: " + data.error); return; }
       batchResults = data;
+      // Keep each document's text beside its result: opening a row rebuilds the
+      // side-by-side view against the exact text those spans were measured on.
+      batchTexts = documents.map(d => d.text);
       renderBatch();
       const s = batchResults.summary;
       setStatus("Batch done — " + s.auto_post + " auto-post, " + s.review + " for review.");
@@ -1098,9 +1553,18 @@ Goods received in good condition. Please sign and return one copy.`
   $("batch-table").addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-open]");
     if (!btn || !batchResults) return;
-    const r = batchResults.results[Number(btn.dataset.open)];
+    const index = Number(btn.dataset.open);
+    const r = batchResults.results[index];
     if (!r) return;
     lastResult = r;
+    const text = batchTexts[index];
+    if (typeof text === "string") {
+      input.value = text;
+      buildProvenance(r, text);
+      setPinned(null);
+      renderSourcePane();
+      showSource(true);
+    }
     await animateTrace(r.trace || [], 0);
     renderResult(r);
     setStatus("Opened " + r.name + " — overall confidence " + pct(r.confidence || 0) + ".");
